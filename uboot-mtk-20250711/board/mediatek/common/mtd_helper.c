@@ -67,38 +67,57 @@ static char env_size[BOOT_PARAM_STR_MAX_LEN];
 static char env_offset[BOOT_PARAM_STR_MAX_LEN];
 #endif
 
+static bool mtdparts_fixed_enabled(void)
+{
+	bool use_fixed = IS_ENABLED(CONFIG_MTK_FIXED_MTD_MTDPARTS);
+	const char *val = env_get("mtdparts_fixed");
+
+	if (!val || !val[0])
+		return use_fixed;
+
+	if (!strcmp(val, "1") || !strcasecmp(val, "true") ||
+	    !strcasecmp(val, "yes") || !strcasecmp(val, "on"))
+		return true;
+
+	if (!strcmp(val, "0") || !strcasecmp(val, "false") ||
+	    !strcasecmp(val, "no") || !strcasecmp(val, "off"))
+		return false;
+
+	return use_fixed;
+}
+
 void gen_mtd_probe_devices(void)
 {
-#ifdef CONFIG_MTK_FIXED_MTD_MTDPARTS
-	const char *mtdids = NULL, *mtdparts = NULL;
+	if (mtdparts_fixed_enabled()) {
+		const char *mtdids = NULL, *mtdparts = NULL;
 
 #if defined(CONFIG_SYS_MTDPARTS_RUNTIME)
 #ifdef CONFIG_MEDIATEK_MULTI_MTD_LAYOUT
-	/* Force runtime re-generation after layout switch in the same session */
-	env_set("mtdids", NULL);
-	env_set("mtdparts", NULL);
+		/* Force runtime re-generation after layout switch in the same session */
+		env_set("mtdids", NULL);
+		env_set("mtdparts", NULL);
 #endif
-	board_mtdparts_default(&mtdids, &mtdparts);
+		board_mtdparts_default(&mtdids, &mtdparts);
 #else
 #if defined(MTDIDS_DEFAULT)
-	mtdids = MTDIDS_DEFAULT;
+		mtdids = MTDIDS_DEFAULT;
 #elif defined(CONFIG_MTDIDS_DEFAULT)
-	mtdids = CONFIG_MTDIDS_DEFAULT;
+		mtdids = CONFIG_MTDIDS_DEFAULT;
 #endif
 
 #if defined(MTDPARTS_DEFAULT)
-	mtdparts = MTDPARTS_DEFAULT;
+		mtdparts = MTDPARTS_DEFAULT;
 #elif defined(CONFIG_MTDPARTS_DEFAULT)
-	mtdparts = CONFIG_MTDPARTS_DEFAULT;
+		mtdparts = CONFIG_MTDPARTS_DEFAULT;
 #endif
 #endif
 
-	if (mtdids)
-		env_set("mtdids", mtdids);
+		if (mtdids)
+			env_set("mtdids", mtdids);
 
-	if (mtdparts)
-		env_set("mtdparts", mtdparts);
-#endif
+		if (mtdparts)
+			env_set("mtdparts", mtdparts);
+	}
 
 	mtd_probe_devices();
 }
