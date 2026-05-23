@@ -1184,7 +1184,10 @@ function getmtdlayoutlist() {
             const layoutNames = responseText.split(";");
 
             const currentLayoutEl = document.getElementById("current_mtd_layout");
-            if (currentLayoutEl) currentLayoutEl.innerHTML = t("label.current_mtd") + layoutNames[0];
+            if (currentLayoutEl) {
+                const cur = layoutNames[0];
+                currentLayoutEl.innerHTML = cur ? t("label.current_mtd") + cur : "";
+            }
 
             const chooseLayoutEl = document.getElementById("choose_mtd_layout");
             if (chooseLayoutEl) chooseLayoutEl.textContent = t("label.choose_mtd");
@@ -1193,13 +1196,17 @@ function getmtdlayoutlist() {
             if (!layoutSelect) return;
 
             layoutSelect.options.length = 0;
+            let hasOptions = false;
             for (let i = 1; i < layoutNames.length; i++) {
                 const name = layoutNames[i];
-                if (name?.length > 0) layoutSelect.options.add(new Option(name, name));
+                if (name?.length > 0) {
+                    layoutSelect.options.add(new Option(name, name));
+                    hasOptions = true;
+                }
             }
 
             const layoutContainer = document.getElementById("mtd_layout");
-            if (layoutContainer) layoutContainer.style.display = "";
+            if (layoutContainer) layoutContainer.style.display = hasOptions ? "" : "none";
         },
     });
 }

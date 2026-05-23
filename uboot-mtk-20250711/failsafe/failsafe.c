@@ -49,10 +49,11 @@ static bool auto_action_pending;
 static failsafe_fw_t fw_type;
 static bool failsafe_httpd_running;
 
-#ifdef CONFIG_MEDIATEK_MULTI_MTD_LAYOUT
 #define MTD_LAYOUTS_MAXLEN	128
 #define MTD_LAYOUT_CUSTOM_LABEL	"custom"
 #define MTD_LAYOUT_CUSTOM_ENV	"mtd_layout_custom"
+
+#ifdef CONFIG_MEDIATEK_MULTI_MTD_LAYOUT
 static char mtd_layout_label[MTD_LAYOUTS_MAXLEN];
 static bool mtd_layout_save_pending;
 const char *get_mtd_layout_label(void);
@@ -1029,7 +1030,59 @@ static void mtd_layout_handler(enum httpd_uri_handler_status status,
 #ifdef CONFIG_MEDIATEK_MULTI_MTD_LAYOUT
 	response->data = get_mtdlayout_str();
 #else
-	response->data = "error";
+	{
+		const char *custom = env_get(MTD_LAYOUT_CUSTOM_ENV);
+		bool mtd_unavailable = false;
+
+#ifdef CONFIG_MTK_BOOTMENU_MMC
+		/* When MMC is present, only show MTD layout if there
+		 * is genuine MTD hardware or runtime evidence:
+		 *  - /mtd-layout OF node exists
+		 *  - mtd_layout_custom env is set (user-configured)
+		 *  - mtdparts / mtdids env is set (MTD was probed)
+		 * Otherwise return an empty body so the frontend
+		 * hides the MTD section on MMC-only devices.
+		 */
+		if (failsafe_mmc_present()) {
+			bool has_mtd = false;
+			ofnode node = ofnode_path("/mtd-layout");
+
+			if (ofnode_valid(node)) {
+				has_mtd = true;
+			} else if (custom && custom[0]) {
+				has_mtd = true;
+			} else {
+				const char *mtdparts = env_get("mtdparts");
+				const char *mtdids = env_get("mtdids");
+
+				if ((mtdparts && mtdparts[0]) ||
+				    (mtdids && mtdids[0]))
+					has_mtd = true;
+			}
+
+			if (!has_mtd)
+				mtd_unavailable = true;
+		}
+#endif
+
+		if (mtd_unavailable) {
+			response->data = "";
+		} else if (custom && custom[0]) {
+			static char single_str[64];
+			const char *cur = env_get("mtd_layout");
+
+			if (!cur || !cur[0])
+				cur = env_get("mtd_layout_label");
+			if (!cur || strcmp(cur, MTD_LAYOUT_CUSTOM_LABEL))
+				cur = "default";
+
+			snprintf(single_str, sizeof(single_str),
+				 "%s;default;%s;", cur, MTD_LAYOUT_CUSTOM_LABEL);
+			response->data = single_str;
+		} else {
+			response->data = ";";
+		}
+	}
 #endif
 
 	response->size = strlen(response->data);

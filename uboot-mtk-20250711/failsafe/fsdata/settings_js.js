@@ -84,9 +84,11 @@
 
         if (!text || text === "error") return;
 
-        const parts = text.split(";").filter((s) => s.length > 0);
-        if (parts.length < 1) return;
+        /* Show the MTD section for any valid response */
+        if (section) section.style.display = "";
 
+        const parts = text.split(";");
+        /* parts[0] = current layout label, parts[1..] = available layouts */
         const previousValue = select.value;
         select.options.length = 0;
 
@@ -95,7 +97,7 @@
         blank.textContent = t("settings.value.default", "Default");
         select.appendChild(blank);
 
-        const labels = parts.slice(1);
+        const labels = parts.slice(1).filter((s) => s.length > 0);
         if (!labels.includes(MTD_CUSTOM_LABEL))
             labels.push(MTD_CUSTOM_LABEL);
 
@@ -107,8 +109,6 @@
         }
 
         if (previousValue) select.value = previousValue;
-        if (section) section.style.display = "";
-
         syncMtdCustomVisibility();
     }
 
