@@ -332,6 +332,14 @@ You can connect to the device with telnet, default port is 23, and you can set t
 
 TelnetD is enabled by default, but you can set the `telnetd_enable` environment variable to 0/false/no/off to disable it.
 
+### Unified env-controlled NMBM enablement(Only for MTD devices)
+
+You can set `nmbm_enable` environment variable to 0/false/no/off to disable MTK-NMBM.
+
+> Only for MTD devices which enable MTK-NMBM configs before compile.
+
+More information about the NMBM enablement can be found in the [unified env-controlled NMBM enablement](./document/unified-env-controlled-NMBM-enablement.md) documentation.
+
 ---
 
 <a id="ENDNOTE"></a>
