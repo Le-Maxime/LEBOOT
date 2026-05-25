@@ -78,7 +78,7 @@ FILE_favicon.o := favicon.svg
 FSPATH_favicon.o := favicon.svg
 
 obj-y += style.o
-FILE_style.o := style.css
+FILE_style.o := .min/style.css
 FSPATH_style.o := style.css
 
 obj-$(CONFIG_WEBUI_FAILSAFE_BACKUP) += backup_js.o
@@ -117,13 +117,18 @@ FSPATH_theme.o := theme.js
 strip_path = $(subst /,_,$(subst -,_,$(subst .,_,$(1))))
 WEBUI_FAILSAFE_JS_MINIFY_SCRIPT = $(srctree)/$(src)/../minify-js.cjs
 
+WEBUI_FAILSAFE_CSS_MINIFY_SCRIPT = $(srctree)/$(src)/../minify-css.cjs
+
+quiet_cmd_minify_css = CLEANCSS $@
+cmd_minify_css = mkdir -p $(dir $@) && node $(WEBUI_FAILSAFE_CSS_MINIFY_SCRIPT) $< $@
+
 quiet_cmd_minify_js = UGLIFY  $@
 cmd_minify_js = mkdir -p $(dir $@) && node $(WEBUI_FAILSAFE_JS_MINIFY_SCRIPT) $< $@
 
 quiet_cmd_as_o_html = AS      $@
 cmd_as_o_html = $(CC) $(a_flags) -c -o $@ \
 		-DDATA_SECT_NAME="\".rodata.fsdata.$(call strip_path,$(FSPATH_$(@F)))\"" \
-		-DDATA_OBJ_FILE="\"$(srctree)/$(obj)/$(FILE_$(@F))\"" \
+		-DDATA_OBJ_FILE="\"$(abspath $(srctree)/$(obj)/$(FILE_$(@F)))\"" \
 		-DDATA_OBJ_NAME="fsdata_$(call strip_path,$(FSPATH_$(@F)))" \
 		-DDATA_SIZE_NAME="fsdata_size_$(call strip_path,$(FSPATH_$(@F)))" \
 		-DDATA_SECT_FSPATH_NAME="\".rodata.fsdata.path.$(call strip_path,$(FSPATH_$(@F)))\"" \
@@ -137,14 +142,16 @@ $(obj)/%.o: $(src)/%.html FORCE
 	$(call cmd,force_checksrc)
 	$(call if_changed_dep,as_o_html)
 
-$(obj)/%.o: $(src)/%.css FORCE
+$(obj)/.min/%.css: $(src)/%.css $(WEBUI_FAILSAFE_CSS_MINIFY_SCRIPT) FORCE
 	$(call cmd,force_checksrc)
+	$(call if_changed,minify_css)
+
+$(obj)/style.o: $(obj)/.min/style.css FORCE
 	$(call if_changed_dep,as_o_html)
 
 $(obj)/.min/%.js: $(src)/%.js $(WEBUI_FAILSAFE_JS_MINIFY_SCRIPT) FORCE
 	$(call cmd,force_checksrc)
 	$(call if_changed,minify_js)
-
 $(obj)/%.o: $(obj)/.min/%.js FORCE
 	$(call if_changed_dep,as_o_html)
 
