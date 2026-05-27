@@ -85,6 +85,13 @@ config SILENT
 	bool "Run scripts in silent mode"
 	default y
 
+config BUILD_LOG
+	bool "Save build output to log file"
+	default n
+	help
+	  When enabled, build output will be saved to output/build-<board>-<version>-<variant>.log.
+	  When disabled (default), build output is only shown on the console.
+
 endmenu
 
 menu "ATF build settings"
