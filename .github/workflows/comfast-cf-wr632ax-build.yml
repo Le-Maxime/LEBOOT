@@ -1,0 +1,123 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Copyright (C) 2026 DarkAssassinUA
+#
+# All rights reserved.
+#
+name: Build Comfast CF-WR632AX (SP2, ubootmod)
+
+on:
+  workflow_dispatch:
+
+env:
+  REPO_URL: 'https://github.com/DarkAssassinUA/bl-mt798x-dhcpd'
+  REPO_BRANCH: 'master'
+  TZ: Asia/Shanghai
+  UPLOAD_ARTIFACT: true
+  UPLOAD_RELEASE: true
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Initialize build environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install git rename tar
+          sudo timedatectl set-timezone "$TZ"
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
+
+      - name: Checkout source
+        working-directory: /workdir
+        run: |
+          df -hT $PWD
+          git clone $REPO_URL -b $REPO_BRANCH bl-mt798x-dhcpd
+          ln -sf /workdir/bl-mt798x-dhcpd $GITHUB_WORKSPACE/bl-mt798x-dhcpd
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo -E apt-get -qq install $(cat bl-mt798x-dhcpd/depends/ubuntu-22.04)
+
+      - name: Build FIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd bl-mt798x-dhcpd
+          
+          # Run build command for the specific board
+          make BOARD=comfast_cf-wr632ax VERSION=SP2 VARIANT=ubootmod
+
+          echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Organize files and rename
+        id: organize
+        if: env.UPLOAD_ARTIFACT == 'true' && !cancelled()
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd bl-mt798x-dhcpd
+
+          TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+
+          # Rename files in output directory
+          if [ -d "output" ]; then
+            rename "s/(.*)\.(.*)/\$1_${TIMESTAMP}.\$2/" output/* || true
+          fi
+
+          mkdir -p upload
+          if [ -d "output" ]; then
+            cp -r output/* upload/ || true
+          fi
+
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Upload artifacts to Actions
+        uses: actions/upload-artifact@main
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        with:
+          name: ${{ env.FILE_DATE }}-comfast_cf-wr632ax-SP2-ubootmod
+          path: |
+            bl-mt798x-dhcpd/upload/*
+
+      - name: Generate release notes
+        id: tag
+        if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+        shell: bash
+        run: |
+          set -euo pipefail
+          touch release.txt
+
+          echo "- Commit: ${{ github.sha }}" >> release.txt
+          echo "- Target model: comfast_cf-wr632ax" >> release.txt
+          echo "- Version: SP2" >> release.txt
+          echo "- Variant: ubootmod" >> release.txt
+          echo "- Build time: ${{ env.FILE_DATE }}" >> release.txt
+
+          echo "" >> release.txt
+          echo "---" >> release.txt
+          echo "" >> release.txt
+          echo "**PLEASE SEE THE README FOR USAGE INSTRUCTIONS AND DISCLAIMERS.**" >> release.txt
+          echo "release_tag=${{ env.FILE_DATE }}-comfast_cf-wr632ax-SP2-ubootmod" >> $GITHUB_OUTPUT
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2.1.0
+        if: steps.tag.outputs.status == 'success' && !cancelled() && env.UPLOAD_RELEASE == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: bl-mt798x-dhcpd/upload/*
+          release_name: ${{ env.FILE_DATE }}-comfast_cf-wr632ax-SP2-ubootmod
+          name: ${{ env.FILE_DATE }}-comfast_cf-wr632ax-SP2-ubootmod
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          body_path: release.txt
