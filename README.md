@@ -43,7 +43,7 @@
 Просто зайдите на роутер по SSH и выполните следующую команду. Скрипт сам определит ваше устройство, скачает свежую тему с GitHub, разблокирует память ядра и прошьет загрузчик:
 
 ```bash
-wget -qO /tmp/flash.sh --no-check-certificate https://raw.githubusercontent.com/DarkAssassinUA/bl-mt798x-dhcpd/master/flash.sh && sh /tmp/flash.sh
+wget -qO /tmp/flash.sh --no-check-certificate https://raw.githubusercontent.com/DarkAssassinUA/LEBOOT/master/flash.sh && sh /tmp/flash.sh
 ```
 
 ---
