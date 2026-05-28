@@ -56,7 +56,13 @@ jobs:
           # Run build command for the specific board
           make BOARD=comfast_cf-wr632ax VERSION=SP2 VARIANT=ubootmod FSTHEME=leboot
 
+          # Extract LEBOOT version dynamically
+          leboot_version=$(grep -oE "LEBOOT v[0-9.]+" uboot-mtk-20250711/failsafe/fsdata_leboot/main.js | head -n 1 || echo "LEBOOT v1.0")
+          leboot_tag=$(echo "$leboot_version" | tr ' ' '-')
+
           echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
+          echo "LEBOOT_VER=$leboot_version" >> $GITHUB_ENV
+          echo "LEBOOT_TAG=$leboot_tag" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
 
       - name: Organize files and rename
@@ -85,7 +91,7 @@ jobs:
         uses: actions/upload-artifact@main
         if: steps.organize.outputs.status == 'success' && !cancelled()
         with:
-          name: ${{ env.FILE_DATE }}-LEBOOT
+          name: ${{ env.FILE_DATE }}-${{ env.LEBOOT_TAG }}
           path: |
             bl-mt798x-dhcpd/upload/*
 
@@ -98,14 +104,14 @@ jobs:
           touch release.txt
 
           echo "- Коммит: ${{ github.sha }}" >> release.txt
-          echo "- Версия: LEBOOT v1.0" >> release.txt
+          echo "- Версия: ${{ env.LEBOOT_VER }}" >> release.txt
           echo "- Время сборки: ${{ env.FILE_DATE }}" >> release.txt
 
           echo "" >> release.txt
           echo "---" >> release.txt
           echo "" >> release.txt
           echo "**ИНСТРУКЦИИ ПО ИСПОЛЬЗОВАНИЮ И ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ СМОТРИТЕ В README.**" >> release.txt
-          echo "release_tag=${{ env.FILE_DATE }}-LEBOOT" >> $GITHUB_OUTPUT
+          echo "release_tag=${{ env.FILE_DATE }}-${{ env.LEBOOT_TAG }}" >> $GITHUB_OUTPUT
           echo "status=success" >> $GITHUB_OUTPUT
 
       - name: Publish to GitHub Release
@@ -115,7 +121,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: bl-mt798x-dhcpd/upload/*
-          release_name: ${{ env.FILE_DATE }}-LEBOOT
-          name: ${{ env.FILE_DATE }}-LEBOOT
+          release_name: ${{ env.FILE_DATE }}-${{ env.LEBOOT_TAG }}
+          name: ${{ env.FILE_DATE }}-${{ env.LEBOOT_TAG }}
           tag_name: ${{ steps.tag.outputs.release_tag }}
           body_path: release.txt
