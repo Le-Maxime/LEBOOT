@@ -80,14 +80,23 @@ if [ -f "/sys/class/mtd/mtd${MTD_INDEX}/ro" ]; then
         # Перепроверяем статус
         IS_RO=$(cat "/sys/class/mtd/mtd${MTD_INDEX}/ro")
         if [ "$IS_RO" = "1" ]; then
-            info "Раздел все еще заблокирован. Устанавливаем kmod-mtd-rw через opkg..."
+            info "Раздел все еще заблокирован. Устанавливаем kmod-mtd-rw..."
             
-            # Запускаем обновление пакетов и установку драйвера
-            opkg update || true
-            if opkg install kmod-mtd-rw; then
-                # Пробуем загрузить свежеустановленный модуль
-                load_mtd_rw
+            # Проверяем пакетный менеджер и устанавливаем kmod-mtd-rw
+            if command -v apk >/dev/null 2>&1; then
+                info "Обнаружен пакетный менеджер apk. Обновляем репозитории и устанавливаем модуль..."
+                apk update || true
+                apk add kmod-mtd-rw || true
+            elif command -v opkg >/dev/null 2>&1; then
+                info "Обнаружен пакетный менеджер opkg. Обновляем репозитории и устанавливаем модуль..."
+                opkg update || true
+                opkg install kmod-mtd-rw || true
+            else
+                warn "Пакетный менеджер (apk или opkg) не найден!"
             fi
+            
+            # Пробуем загрузить свежеустановленный модуль
+            load_mtd_rw
         fi
         
         # Финальная перепроверка статуса после попытки разблокировки
@@ -98,7 +107,11 @@ if [ -f "/sys/class/mtd/mtd${MTD_INDEX}/ro" ]; then
             warn "Не удалось автоматически установить или загрузить модуль разблокировки разделов."
             warn "Пожалуйста, подключите роутер к интернету и выполните команды вручную:"
             echo ""
-            echo -e "  \033[1;32mopkg update && opkg install kmod-mtd-rw\033[0m"
+            if command -v apk >/dev/null 2>&1; then
+                echo -e "  \033[1;32mapk update && apk add kmod-mtd-rw\033[0m"
+            else
+                echo -e "  \033[1;32mopkg update && opkg install kmod-mtd-rw\033[0m"
+            fi
             echo -e "  \033[1;32minsmod mtd-rw i_want_a_brick=1\033[0m"
             echo ""
             error "После ручной установки запустите этот скрипт снова!"
