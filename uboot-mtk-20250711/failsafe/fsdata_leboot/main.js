@@ -469,7 +469,7 @@ function ensureBranding() {
     versionNode.style.fontSize = "0.82rem";
 
     versionNode.innerHTML = `
-        <strong>LEBOOT v1.0</strong><br>
+        <strong>LEBOOT v1.1</strong><br>
         дизайн: Le Maxime<br>
         <span style="font-size: 0.72rem; opacity: 0.85;">основано на ${baseVersion}</span>
     `;
