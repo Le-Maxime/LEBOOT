@@ -48,8 +48,8 @@ ifeq ($(origin FSTHEME), undefined)
     FSTHEME := gl
   else ifeq ($(strip $(CONFIG_FSTHEME_MTK)),y)
     FSTHEME := mtk
-  else ifeq ($(strip $(CONFIG_FSTHEME_DARKASSASSIN)),y)
-    FSTHEME := darkassassin
+  else ifeq ($(strip $(CONFIG_FSTHEME_LEBOOT)),y)
+    FSTHEME := leboot
   else
     FSTHEME := bootstrap
   endif

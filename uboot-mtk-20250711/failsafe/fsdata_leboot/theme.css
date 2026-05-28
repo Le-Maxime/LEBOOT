@@ -1,0 +1,347 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+/*
+ * Copyright (C) 2026 LeBOOT Redesign
+ * All rights reserved.
+ */
+
+/* ── Design Tokens ─────────────────────────────────────────────── */
+:root {
+    color-scheme: dark;
+
+    /* palette */
+    --bg:             #0c0e12;
+    --panel:          #1b1d24;
+    --panel-2:        #22252e;
+    --panel-rgb:      27, 29, 36;
+    --panel-strong:   rgba(34, 37, 46, 0.95);
+    --text:           #f3f4f6;
+    --muted:          #9ca3af;
+    --border:         rgba(255, 255, 255, 0.08);
+    --border-strong:  rgba(255, 255, 255, 0.16);
+    --shadow-sm:      0 1px 2px rgba(0, 0, 0, 0.40);
+    --shadow:
+        0 4px 20px rgba(0, 0, 0, 0.50),
+        0 1px 0 rgba(255, 255, 255, 0.05) inset;
+    --shadow-lg:
+        0 10px 40px rgba(0, 0, 0, 0.70);
+    --primary:        #ff5c00;
+    --primary-2:      #ff7c24;
+    --primary-rgb:    255, 92, 0;
+    --danger:         #ef4444;
+    --danger-rgb:     239, 68, 68;
+    --success:        #10b981;
+    --success-rgb:    16, 185, 129;
+    --warn-bg:        rgba(245, 158, 11, 0.08);
+    --warn-border:    rgba(245, 158, 11, 0.25);
+    --err-bg:         rgba(239, 68, 68, 0.08);
+    --err-border:     rgba(239, 68, 68, 0.25);
+    --focus-ring:     0 0 0 2px var(--bg), 0 0 0 4px rgba(var(--primary-rgb), 0.50);
+    --surface-tint:   rgba(var(--primary-rgb), 0.06);
+    --inset-highlight: rgba(255, 255, 255, 0.05);
+    --hairline:       linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.15), transparent);
+
+    /* console styling variables */
+    --console-bg:     #08090d;
+    --console-color:  #f3f4f6;
+    --console-border: var(--border);
+    --console-glow-1: rgba(var(--primary-rgb), 0.03);
+    --console-glow-2: rgba(var(--primary-rgb), 0.05);
+
+    /* geometry */
+    --radius-xs:      6px;
+    --radius-sm:      10px;
+    --radius:         16px;
+    --radius-lg:      20px;
+    --card-w:         800px;
+    --sidebar-w:      280px;
+
+    /* spacing */
+    --sp-xs:          4px;
+    --sp-sm:          8px;
+    --sp-md:          14px;
+    --sp-lg:          24px;
+    --sp-xl:          36px;
+
+    /* motion */
+    --ease-out:       cubic-bezier(.16, 1, .3, 1);
+    --ease-in-out:    cubic-bezier(.65, 0, .35, 1);
+    --ease-spring:    cubic-bezier(.34, 1.56, .64, 1);
+    --ease-theme:     cubic-bezier(.22, .61, .36, 1);
+    --anim-fast:      150ms;
+    --anim:           220ms;
+    --anim-slow:      350ms;
+    --theme-duration: 400ms;
+
+    /* typography */
+    --font-sans:      "Inter", system-ui, -apple-system, sans-serif;
+    --font-mono:      "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+}
+
+/* ── Light scheme (support fallback) ────────────────────────── */
+html[data-theme="light"] {
+    color-scheme: light;
+    --bg:             #f3f4f6;
+    --panel:          #ffffff;
+    --panel-2:        #f9fafb;
+    --panel-rgb:      255, 255, 255;
+    --panel-strong:   #f3f4f6;
+    --text:           #111827;
+    --muted:          #6b7280;
+    --border:         rgba(0, 0, 0, 0.08);
+    --border-strong:  rgba(0, 0, 0, 0.16);
+    --shadow-sm:      0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow:         0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg:      0 10px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* ── AMOLED variant (pure black) ──────────────────────────────── */
+html[data-theme="dark"][data-theme-dark="amoled"] {
+    --bg:             #000000;
+    --panel:          #0a0a0a;
+    --panel-2:        #121212;
+    --panel-rgb:      10, 10, 10;
+    --panel-strong:   #161616;
+}
+
+/* ── App Shell Floating Overrides ─────────────────────────────── */
+body {
+    background-color: var(--bg);
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    color: var(--text);
+}
+
+body .app {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+    box-sizing: border-box;
+    align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+    body .app {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+    }
+}
+
+/* Floating Sidebar */
+body .sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    flex-shrink: 0;
+    height: auto;
+    position: static;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--panel);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: var(--shadow);
+}
+
+@media (max-width: 900px) {
+    body .sidebar {
+        width: 100%;
+        min-width: 100%;
+    }
+}
+
+/* Brand Capsule */
+.brand-capsule {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    padding: 14px 20px 12px 20px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    margin-bottom: 12px;
+    user-select: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 1px;
+}
+
+.brand-capsule .brand-le {
+    color: var(--text);
+    font-weight: 900;
+    font-size: 1.3rem;
+    letter-spacing: 0.06em;
+    line-height: 1;
+}
+
+.brand-capsule .brand-boot {
+    color: var(--primary);
+    font-weight: 900;
+    font-size: 1.3rem;
+    letter-spacing: 0.06em;
+    line-height: 1;
+}
+
+/* Nav Links Styling */
+body .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nav-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.98rem;
+    font-weight: 500;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    transition: all var(--anim) var(--ease-out);
+    text-transform: lowercase;
+}
+
+html[data-theme="light"] .nav-link {
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.nav-link:hover {
+    color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.08);
+}
+
+.nav-link.active {
+    color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.12);
+    font-weight: 700;
+}
+
+.nav-link .nav-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+    display: block;
+}
+
+/* Floating Card Container */
+body .main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0;
+}
+
+body #m {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--panel);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-sizing: border-box;
+    padding: 32px;
+    box-shadow: var(--shadow);
+}
+
+/* Lowercase, bold and italic headings */
+body h1 {
+    font-size: 2.3rem !important;
+    font-weight: 800 !important;
+    font-style: italic !important;
+    text-transform: lowercase !important;
+    color: var(--text) !important;
+    margin: 0 0 16px 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    letter-spacing: -0.03em !important;
+}
+
+body h1::after {
+    display: none !important;
+}
+
+/* Clean Info Table rows */
+.sysinfo-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.95rem;
+}
+
+.sysinfo-table tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="light"] .sysinfo-table tr {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.sysinfo-table tr:last-child {
+    border-bottom: none;
+}
+
+.sysinfo-table td {
+    padding: 14px 0;
+    color: var(--text);
+    vertical-align: middle;
+}
+
+.sysinfo-table td.key {
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+    padding-right: 24px;
+}
+
+.sysinfo-table td.val {
+    font-family: var(--font-mono);
+    text-align: left;
+}
+
+/* Controls block styling */
+body .sidebar-controls {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+body .control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+body .control-row select {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 8px;
+    border-radius: var(--radius-xs);
+    font-size: 0.82rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color var(--anim);
+}
+
+body .control-row select:hover {
+    border-color: var(--primary);
+}

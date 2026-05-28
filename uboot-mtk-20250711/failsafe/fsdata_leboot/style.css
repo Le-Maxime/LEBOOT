@@ -1016,7 +1016,7 @@ ul li {
 /* ── System info ───────────────────────────────────────────────── */
 .sysinfo {
     width: 100%;
-    max-width: 220px;
+    max-width: 380px;
     margin: 0 auto 10px;
     padding: 10px 14px;
     border-radius: var(--radius-sm);

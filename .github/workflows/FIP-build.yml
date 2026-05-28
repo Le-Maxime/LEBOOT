@@ -42,13 +42,13 @@ on:
       FSTHEME:
         description: 'Failsafe theme'
         required: false
-        default: 'bootstrap'
+        default: 'leboot'
         type: choice
         options:
           - bootstrap
           - gl
           - mtk
-          - darkassassin
+          - leboot
       EXTRA_OPTION:
         description: 'Extra option (default=MULTI_LAYOUT off+FIXED_MTDPARTS on, multi_layout=both on, dis_fixed_mtdparts=both off)'
         required: false
@@ -107,7 +107,7 @@ env:
   # Build configuration from inputs
   CONFIG_MODEL: ${{ github.event.inputs.MODEL }}
   CONFIG_VARIANT: ${{ github.event.inputs.VARIANT || 'default' }}
-  CONFIG_FSTHEME: ${{ github.event.inputs.FSTHEME || 'bootstrap' }}
+  CONFIG_FSTHEME: ${{ github.event.inputs.FSTHEME || 'leboot' }}
   CONFIG_EXTRA_OPTION: ${{ github.event.inputs.EXTRA_OPTION || 'default' }}
   CONFIG_SIMG: ${{ github.event.inputs.SIMG || 'false' }}
   CONFIG_BUILD_LOG: ${{ github.event.inputs.BUILD_LOG || 'true' }}
@@ -149,9 +149,9 @@ jobs:
 
         # Validate FSTHEME
         case "$FSTHEME_IN" in
-          bootstrap|gl|mtk|darkassassin) ;;
+          bootstrap|gl|mtk|leboot) ;;
           *)
-            echo "Error: invalid FSTHEME: '$FSTHEME_IN' (expected bootstrap/gl/mtk/darkassassin)" >&2
+            echo "Error: invalid FSTHEME: '$FSTHEME_IN' (expected bootstrap/gl/mtk/leboot)" >&2
             exit 1
             ;;
         esac
@@ -350,12 +350,12 @@ jobs:
         config_apply "CONFIG_FSTHEME_BOOTSTRAP" "n"
         config_apply "CONFIG_FSTHEME_GL" "n"
         config_apply "CONFIG_FSTHEME_MTK" "n"
-        config_apply "CONFIG_FSTHEME_DARKASSASSIN" "n"
+        config_apply "CONFIG_FSTHEME_LEBOOT" "n"
         case "$CONFIG_FSTHEME" in
           bootstrap) config_apply "CONFIG_FSTHEME_BOOTSTRAP" "y" ;;
           gl) config_apply "CONFIG_FSTHEME_GL" "y" ;;
           mtk) config_apply "CONFIG_FSTHEME_MTK" "y" ;;
-          darkassassin) config_apply "CONFIG_FSTHEME_DARKASSASSIN" "y" ;;
+          leboot) config_apply "CONFIG_FSTHEME_LEBOOT" "y" ;;
         esac
 
         # EXTRA_OPTION: determines MULTI_LAYOUT and FIXED_MTDPARTS

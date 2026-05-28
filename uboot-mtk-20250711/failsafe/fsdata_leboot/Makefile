@@ -134,8 +134,8 @@ cmd_minify_html = mkdir -p $(dir $@) && node $(WEBUI_FAILSAFE_HTML_MINIFY_SCRIPT
 quiet_cmd_minify_js = UGLIFY  $@
 cmd_minify_js = mkdir -p $(dir $@) && node $(WEBUI_FAILSAFE_JS_MINIFY_SCRIPT) $< $@
 
-quiet_cmd_fsdadarkassassin_gzembed = GZIP    $@
-cmd_fsdadarkassassin_gzembed = node $(WEBUI_FAILSAFE_GZIP_SCRIPT) $< $@
+quiet_cmd_fsdaleboot_gzembed = GZIP    $@
+cmd_fsdaleboot_gzembed = node $(WEBUI_FAILSAFE_GZIP_SCRIPT) $< $@
 
 quiet_cmd_as_o_html = AS      $@
 cmd_as_o_html = $(CC) $(a_flags) -c -o $@ \
@@ -165,16 +165,16 @@ $(obj)/.min/%.js: $(src)/%.js $(WEBUI_FAILSAFE_JS_MINIFY_SCRIPT) FORCE
 
 # Step 2: GZip-compress minified files
 $(obj)/.min/%.html.gz: $(obj)/.min/%.html $(WEBUI_FAILSAFE_GZIP_SCRIPT) FORCE
-	$(call if_changed,fsdadarkassassin_gzembed)
+	$(call if_changed,fsdaleboot_gzembed)
 
 $(obj)/.min/%.css.gz: $(obj)/.min/%.css $(WEBUI_FAILSAFE_GZIP_SCRIPT) FORCE
-	$(call if_changed,fsdadarkassassin_gzembed)
+	$(call if_changed,fsdaleboot_gzembed)
 
 $(obj)/.min/%.js.gz: $(obj)/.min/%.js $(WEBUI_FAILSAFE_GZIP_SCRIPT) FORCE
-	$(call if_changed,fsdadarkassassin_gzembed)
+	$(call if_changed,fsdaleboot_gzembed)
 
 $(obj)/.min/%.svg.gz: $(src)/%.svg $(WEBUI_FAILSAFE_GZIP_SCRIPT) FORCE
-	$(call if_changed,fsdadarkassassin_gzembed)
+	$(call if_changed,fsdaleboot_gzembed)
 
 # Step 3: Embed GZip-compressed files into object files
 $(obj)/%.o: $(obj)/.min/%.html.gz FORCE

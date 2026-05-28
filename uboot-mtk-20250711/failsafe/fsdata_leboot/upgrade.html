@@ -4,42 +4,39 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Firmware update</title>
+	<title data-i18n="upgrade.title">FIRMWARE UPDATE</title>
 	<script src="/theme.js"></script>
 	<link rel="stylesheet" href="/style.css">
 	<script src="/i18n.js"></script>
 	<script src="/main.js"></script>
 </head>
 
-<body onload="appInit('index')" data-page="index">
+<body onload="appInit('upgrade')" data-page="upgrade">
 	<div class="app">
 		<aside id="sidebar" class="sidebar"></aside>
 		<div class="main">
 			<div id="m">
 				<div class="card-head">
-					<div id="upload_hero" class="upload-hero" aria-hidden="true">
+					<div class="upload-hero" aria-hidden="true">
 						<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
 							<polyline points="17 8 12 3 7 8"></polyline>
 							<line x1="12" y1="3" x2="12" y2="15"></line>
 						</svg>
 					</div>
-					<h1 data-i18n="index.title">FIRMWARE UPDATE</h1>
-					<p id="hint" data-i18n-html="index.hint">
+					<h1 data-i18n="upgrade.title">FIRMWARE UPDATE</h1>
+					<p id="hint" data-i18n-html="upgrade.hint">
 						You are going to update <strong>firmware</strong> on the device.<br>
 						Please, choose file from your local hard drive and click <strong>Upload</strong> button.
 					</p>
 				</div>
 				<div class="card-main">
 					<form id="form">
-						<div id="mtd_layout" style="display: none;">
+						<div id="mtd_layout" style="display: none !important;">
 							<div id="current_mtd_layout" hidden></div>
-							<br>
-							<div id="choose_mtd_layout" data-i18n="label.choose_mtd">Choose mtd layout:</div>
-							<select id="mtd_layout_label" name="mtd_layout_label" class="field-control"></select>
-							<br><br>
+							<div id="choose_mtd_layout" hidden></div>
+							<select id="mtd_layout_label" name="mtd_layout_label" class="field-control" style="display:none;"></select>
 						</div>
-						<div id="sysinfo" class="sysinfo" data-i18n="sysinfo.loading">Loading system info...</div>
 						<input id="file" type="file" name="firmware">
 						<input type="button" value="Upload" data-i18n-attr="value:common.upload"
 							onclick="upload('firmware')">
@@ -51,7 +48,7 @@
 					<div id="md5" style="display: none;">MD5: xxxx</div>
 					<div id="mtd" style="display: none;">MTD layout: xxxx</div>
 					<div id="upgrade" style="display: none;">
-						<p data-i18n="index.upgrade_hint">If all information above is correct, click "Update".</p>
+						<p data-i18n="upgrade.upgrade_hint">If all information above is correct, click "Update".</p>
 						<button class="button" data-i18n="common.update"
 							onclick="location = '/flashing.html'">Update</button>
 					</div>
@@ -60,11 +57,12 @@
 					<div class="i w">
 						<strong data-i18n="common.warnings">WARNINGS</strong>
 						<ul>
-							<li data-i18n="index.warn.1">do not power off the device during update</li>
-							<li data-i18n="index.warn.2">if everything goes well, the device will restart</li>
-							<li data-i18n="index.warn.3">you can upload whatever you want, so be sure that you choose
+							<li data-i18n="upgrade.warn.1">do not power off the device during update</li>
+							<li data-i18n="upgrade.warn.2">if everything goes well, the device will restart</li>
+							<li data-i18n="upgrade.warn.3">you can upload whatever you want, so be sure that you choose
 								proper
 								firmware image for your device</li>
+							<li data-i18n="upgrade.warn.4">use only files intended for OpenWrt U-Boot layout / ubootmod</li>
 						</ul>
 					</div>
 				</div>

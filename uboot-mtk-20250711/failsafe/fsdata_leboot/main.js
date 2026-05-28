@@ -16,18 +16,13 @@ const PROJECT_REPO_URL = "https://github.com/Yuzhii0718/bl-mt798x-dhcpd";
 
 // Single global state container (defined eagerly so early helpers can read it).
 var APP_STATE = {
-    lang: "en",
+    lang: "ru",
     theme: "auto",
     page: "",
 };
 
 function normalizeLang(input) {
-    if (!input) return "en";
-    const lowerCaseLanguage = String(input).toLowerCase();
-    if (lowerCaseLanguage.indexOf("zh") === 0) return "zh-cn";
-    if (lowerCaseLanguage.indexOf("ru") === 0) return "ru";
-    if (lowerCaseLanguage.indexOf("uk") === 0) return "uk";
-    return "en";
+    return "ru";
 }
 
 function detectLang() {
@@ -458,47 +453,51 @@ function ensureBranding() {
     const versionNode = document.getElementById("version");
     if (!versionNode) return;
 
-    // Remove an existing sibling brand node (if present)
-    const nextSibling = versionNode.nextElementSibling;
-    if (nextSibling?.classList?.contains("brand")) {
-        nextSibling.remove();
+    // Use current content as base version string
+    let baseVersion = versionNode.getAttribute("data-base-version");
+    if (!baseVersion) {
+        baseVersion = versionNode.innerHTML.trim() || "U-Boot Failsafe UI v2026.05.27 (e4df220cf)";
+        // Strip out any previously appended branding if re-run
+        const projectIdx = baseVersion.indexOf("You can find");
+        if (projectIdx !== -1) baseVersion = baseVersion.slice(0, projectIdx).trim();
+        versionNode.setAttribute("data-base-version", baseVersion);
     }
 
-    // Ensure an inline brand label exists
-    if (!versionNode.querySelector?.(".brand-inline")) {
-        const brandNode = document.createElement("span");
-        brandNode.className = "brand-inline";
-        brandNode.textContent = AUTHOR_DISPLAY;
-        versionNode.append(" ", brandNode);
-    }
+    versionNode.style.lineHeight = "1.6";
+    versionNode.style.marginTop = "16px";
+    versionNode.style.opacity = "0.55";
+    versionNode.style.fontSize = "0.82rem";
 
-    // Ensure project info block exists (don't duplicate)
-    if (versionNode.querySelector?.("#project-info")) return;
-    const projectInfo = document.createElement("div");
-    projectInfo.id = "project-info";
-    projectInfo.innerHTML = `You can find more infomation about this project: <a href="${PROJECT_REPO_URL}" target="_blank" rel="noopener">Github</a>`;
-    versionNode.appendChild(projectInfo);
+    versionNode.innerHTML = `
+        <strong>LEBOOT v1.0</strong><br>
+        дизайн: Le Maxime<br>
+        <span style="font-size: 0.72rem; opacity: 0.85;">основано на ${baseVersion}</span>
+    `;
 }
 
 function ensureSidebar() {
-    const createNavLink = (path, i18nKey, navId) => {
+    const createNavLink = (path, i18nKey, navId, iconSvg) => {
         const link = document.createElement("a");
         link.className = "nav-link";
         link.href = path;
         link.setAttribute("data-nav-id", navId);
 
-        const iconSpan = document.createElement("span");
-        iconSpan.className = "dot";
-        link.appendChild(iconSpan);
-
         const labelSpan = document.createElement("span");
+        labelSpan.className = "nav-label";
         labelSpan.setAttribute("data-i18n", i18nKey);
         labelSpan.textContent = t(i18nKey);
         link.appendChild(labelSpan);
 
+        const iconSpan = document.createElement("span");
+        iconSpan.className = "nav-icon";
+        iconSpan.innerHTML = iconSvg;
+        link.appendChild(iconSpan);
+
         // Normalize and check active
         let normalizedPath = path;
         if (normalizedPath !== "/" && normalizedPath.charAt(0) !== "/") normalizedPath = "/" + normalizedPath;
+        let currentPath = (location && location.pathname) ? location.pathname : "";
+        if (currentPath === "") currentPath = "/";
         const isActive = normalizedPath === currentPath || (normalizedPath === "/" && (currentPath === "/" || currentPath === "/index.html"));
         if (isActive) link.classList.add("active");
         return link;
@@ -511,150 +510,80 @@ function ensureSidebar() {
     if (sidebar.getAttribute("data-rendered") === "1") return;
     sidebar.setAttribute("data-rendered", "1");
 
-    // Prepare current path
-    let currentPath = (location && location.pathname) ? location.pathname : "";
-    if (currentPath === "") currentPath = "/";
-
     // Clear existing content
     sidebar.innerHTML = "";
 
     // Branding
     const brandContainer = document.createElement("div");
-    brandContainer.className = "sidebar-brand";
-    const brandLogo = document.createElement("img");
-    brandLogo.className = "logo";
-    brandLogo.src = "/favicon.svg";
-    brandLogo.alt = "";
-    brandLogo.width = 28;
-    brandLogo.height = 28;
-    brandContainer.appendChild(brandLogo);
-    const brandTitle = document.createElement("div");
-    brandTitle.className = "title";
-    brandTitle.setAttribute("data-i18n", "app.name");
-    brandTitle.textContent = t("app.name");
-    brandContainer.appendChild(brandTitle);
-
-    const helpButton = document.createElement("button");
-    helpButton.type = "button";
-    helpButton.className = "help-btn";
-    helpButton.title = t("help.tooltip", "About & Help");
-    helpButton.setAttribute("data-i18n-attr", "title:help.tooltip");
-    helpButton.setAttribute("aria-label", t("help.tooltip", "About & Help"));
-    helpButton.innerHTML =
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-        '<circle cx="12" cy="12" r="10"></circle>' +
-        '<path d="M9.5 9a2.5 2.5 0 1 1 4.5 1.5c-.6.5-1.5 1-1.5 2"></path>' +
-        '<line x1="12" y1="17" x2="12.01" y2="17"></line>' +
-        '</svg>';
-    helpButton.addEventListener("click", openHelpModal);
-    brandContainer.appendChild(helpButton);
-
+    brandContainer.className = "brand-capsule";
+    brandContainer.innerHTML = '<span class="brand-le">LE</span><span class="brand-boot">BOOT</span>';
     sidebar.appendChild(brandContainer);
 
-    // Controls (language, theme, accent)
-    const controlsContainer = document.createElement("div");
-    controlsContainer.className = "sidebar-controls";
+    // SVG icons
+    const svgs = {
+        home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
+        reload: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
+        box: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`,
+        rotate: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`,
+        cpu: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="15" x2="23" y2="15"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="15" x2="4" y2="15"></line></svg>`,
+        power: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>`,
+        table: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>`,
+        image: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`,
+        download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
+        edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
+        terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`
+    };
 
-    const languageRow = document.createElement("div");
-    languageRow.className = "control-row";
-    const languageLabel = document.createElement("div");
-    languageLabel.setAttribute("data-i18n", "control.language");
-    languageLabel.textContent = t("control.language");
-    languageRow.appendChild(languageLabel);
-
-    const languageSelect = document.createElement("select");
-    languageSelect.id = "lang_select";
-    languageSelect.innerHTML = '<option value="en">English</option><option value="zh-cn">简体中文</option><option value="ru">Русский</option><option value="uk">Українська</option>';
-    languageSelect.value = APP_STATE.lang;
-    languageSelect.onchange = function () { setLang(this.value); };
-    languageRow.appendChild(languageSelect);
-    controlsContainer.appendChild(languageRow);
-
-    const themeRow = document.createElement("div");
-    themeRow.className = "control-row";
-    const themeLabel = document.createElement("div");
-    themeLabel.setAttribute("data-i18n", "control.theme");
-    themeLabel.textContent = t("control.theme");
-    themeRow.appendChild(themeLabel);
-
-    const themeSelect = document.createElement("select");
-    themeSelect.id = "theme_select";
-    const autoOption = document.createElement("option");
-    autoOption.value = "auto";
-    autoOption.setAttribute("data-i18n", "theme.auto");
-    autoOption.textContent = t("theme.auto");
-    const lightOption = document.createElement("option");
-    lightOption.value = "light";
-    lightOption.setAttribute("data-i18n", "theme.light");
-    lightOption.textContent = t("theme.light");
-    const darkOption = document.createElement("option");
-    darkOption.value = "dark";
-    darkOption.setAttribute("data-i18n", "theme.dark");
-    darkOption.textContent = t("theme.dark");
-    themeSelect.appendChild(autoOption);
-    themeSelect.appendChild(lightOption);
-    themeSelect.appendChild(darkOption);
-    themeSelect.value = APP_STATE.theme;
-    themeSelect.onchange = function () { setTheme(this.value, { persistEnv: true, persistLocal: true }); };
-    themeRow.appendChild(themeSelect);
-    controlsContainer.appendChild(themeRow);
-
-    sidebar.appendChild(controlsContainer);
-
-    // Navigation
+    // Navigation Container
     const navContainer = document.createElement("div");
     navContainer.className = "nav";
 
-    // Settings (placed before Basic section)
-    const settingsLink = createNavLink("/settings.html", "nav.settings", "settings");
-    settingsLink.style.display = "none";
-    navContainer.appendChild(settingsLink);
-
-    // Basic section
+    // 1. Basic Settings Section
     const basicSection = document.createElement("div");
     basicSection.className = "nav-section";
+    
     const basicTitle = document.createElement("div");
     basicTitle.className = "nav-section-title";
     basicTitle.setAttribute("data-i18n", "nav.basic");
     basicTitle.textContent = t("nav.basic");
     basicSection.appendChild(basicTitle);
-    basicSection.appendChild(createNavLink("/", "nav.firmware", "firmware"));
-    basicSection.appendChild(createNavLink("/uboot.html", "nav.uboot", "uboot"));
+
+    basicSection.appendChild(createNavLink("/", "nav.firmware", "firmware", svgs.home));
+    basicSection.appendChild(createNavLink("/upgrade.html", "nav.upgrade", "upgrade", svgs.download));
+    basicSection.appendChild(createNavLink("/initramfs.html", "nav.initramfs", "initramfs", svgs.download));
+    basicSection.appendChild(createNavLink("/reboot.html", "nav.reboot", "reboot", svgs.power));
+    
     navContainer.appendChild(basicSection);
 
-    // Advanced section
+    // 2. Advanced Settings Section
     const advancedSection = document.createElement("div");
     advancedSection.className = "nav-section";
+    
     const advancedTitle = document.createElement("div");
     advancedTitle.className = "nav-section-title";
     advancedTitle.setAttribute("data-i18n", "nav.advanced");
     advancedTitle.textContent = t("nav.advanced");
     advancedSection.appendChild(advancedTitle);
-    advancedSection.appendChild(createNavLink("/bl2.html", "nav.bl2", "bl2"));
-    const gptLink = createNavLink("/gpt.html", "nav.gpt", "gpt");
+
+    advancedSection.appendChild(createNavLink("/settings.html", "nav.settings", "settings", svgs.cpu));
+    advancedSection.appendChild(createNavLink("/uboot.html", "nav.uboot", "uboot", svgs.reload));
+    advancedSection.appendChild(createNavLink("/bl2.html", "nav.bl2", "bl2", svgs.reload));
+    
+    const gptLink = createNavLink("/gpt.html", "nav.gpt", "gpt", svgs.table);
     gptLink.style.display = "none";
     advancedSection.appendChild(gptLink);
-    const simgLink = createNavLink("/simg.html", "nav.simg", "simg");
+
+    const simgLink = createNavLink("/simg.html", "nav.simg", "simg", svgs.image);
     simgLink.style.display = "none";
     advancedSection.appendChild(simgLink);
-    advancedSection.appendChild(createNavLink("/factory.html", "nav.factory", "factory"));
-    advancedSection.appendChild(createNavLink("/initramfs.html", "nav.initramfs", "initramfs"));
-    navContainer.appendChild(advancedSection);
 
-    // System section
-    const systemSection = document.createElement("div");
-    systemSection.className = "nav-section";
-    const systemTitle = document.createElement("div");
-    systemTitle.className = "nav-section-title";
-    systemTitle.setAttribute("data-i18n", "nav.system");
-    systemTitle.textContent = t("nav.system");
-    systemSection.appendChild(systemTitle);
-    systemSection.appendChild(createNavLink("/backup.html", "nav.backup", "backup"));
-    systemSection.appendChild(createNavLink("/flash.html", "nav.flash", "flash"));
-    systemSection.appendChild(createNavLink("/env.html", "nav.env", "env"));
-    systemSection.appendChild(createNavLink("/console.html", "nav.console", "console"));
-    systemSection.appendChild(createNavLink("/reboot.html", "nav.reboot", "reboot"));
-    navContainer.appendChild(systemSection);
+    advancedSection.appendChild(createNavLink("/factory.html", "nav.factory", "factory", svgs.rotate));
+    advancedSection.appendChild(createNavLink("/backup.html", "nav.backup", "backup", svgs.download));
+    advancedSection.appendChild(createNavLink("/flash.html", "nav.flash", "flash", svgs.edit));
+    advancedSection.appendChild(createNavLink("/env.html", "nav.env", "env", svgs.box));
+    advancedSection.appendChild(createNavLink("/console.html", "nav.console", "console", svgs.terminal));
+
+    navContainer.appendChild(advancedSection);
 
     sidebar.appendChild(navContainer);
 
@@ -864,34 +793,44 @@ function ajax(request) {
 /* envInit moved to env_js.js */
 
 function appInit(pageName) {
-    APP_STATE.page = pageName || "";
-    APP_STATE.i18nEnabled = isI18nAvailable();
-    APP_STATE.lang = detectLang();
-    APP_STATE.theme = detectTheme();
-    setTheme(APP_STATE.theme, { persistEnv: false, persistLocal: true, silent: true });
-    setLang(APP_STATE.lang);
-    ensureSidebar();
-    ensureBranding();
-    ensureFavicon();
-    applyI18n(document);
-    updateDocumentTitle();
-    loadThemeColor();
-    loadThemeMode();
-    loadDarkVariant();
-    setTimeout(function () {
-        document.body.classList.add("ready")
-    }, 0);
-    getversion();
-    // Fetch system info and storage/partition info for display
-    getSysInfo();
-    getStorageInfoForSysinfo();
-    // getCurrentMtdLayout();
-    (pageName === "index" || pageName === "initramfs") && getmtdlayoutlist();
-    pageName === "backup" && typeof backupInit === "function" && backupInit();
-    pageName === "flash" && typeof flashInit === "function" && flashInit();
-    pageName === "console" && typeof consoleInit === "function" && consoleInit();
-    pageName === "env" && typeof envInit === "function" && envInit()
-    pageName === "settings" && typeof settingsInit === "function" && settingsInit();
+    try {
+        APP_STATE.page = pageName || "";
+        APP_STATE.i18nEnabled = isI18nAvailable();
+        APP_STATE.lang = detectLang();
+        APP_STATE.theme = detectTheme();
+        setTheme(APP_STATE.theme, { persistEnv: false, persistLocal: true, silent: true });
+        setLang(APP_STATE.lang);
+        ensureSidebar();
+        ensureBranding();
+        ensureFavicon();
+        applyI18n(document);
+        updateDocumentTitle();
+        loadThemeColor();
+        loadThemeMode();
+        loadDarkVariant();
+    } catch (e) {
+        console.error("Critical appInit error:", e);
+    } finally {
+        setTimeout(function () {
+            document.body.classList.add("ready")
+        }, 0);
+    }
+
+    try {
+        getversion();
+        // Fetch system info and storage/partition info for display
+        getSysInfo();
+        getStorageInfoForSysinfo();
+        // getCurrentMtdLayout();
+        (pageName === "index" || pageName === "upgrade" || pageName === "initramfs") && getmtdlayoutlist();
+        pageName === "backup" && typeof backupInit === "function" && backupInit();
+        pageName === "flash" && typeof flashInit === "function" && flashInit();
+        pageName === "console" && typeof consoleInit === "function" && consoleInit();
+        pageName === "env" && typeof envInit === "function" && envInit()
+        pageName === "settings" && typeof settingsInit === "function" && settingsInit();
+    } catch (e) {
+        console.error("Non-critical appInit error:", e);
+    }
 
     const Yuzhii_VERSION = 'UBOOT-MTK-20250711';
     const Yuzhii_LINK = 'https://github.com/Yuzhii0718/';
@@ -965,138 +904,91 @@ function updateSimgNavVisibility() {
 
 function renderSysInfo() {
     const sysinfoContainer = document.getElementById("sysinfo");
-    let sysinfoData;
-    let boardInfo;
-    let ramInfo;
-    let mtdSummary;
     if (!sysinfoContainer) return;
-    sysinfoData = APP_STATE.sysinfo;
+    const sysinfoData = APP_STATE.sysinfo;
     if (!sysinfoData) {
         sysinfoContainer.textContent = t("sysinfo.loading");
-        return
+        return;
     }
-    boardInfo = sysinfoData.board || {};
-    ramInfo = sysinfoData.ram || {};
 
-    while (sysinfoContainer.firstChild) sysinfoContainer.removeChild(sysinfoContainer.firstChild);
+    const boardInfo = sysinfoData.board || {};
+    const ramInfo = sysinfoData.ram || {};
+
+    // Clear sysinfo container
+    sysinfoContainer.innerHTML = "";
     sysinfoContainer.classList.remove("sysinfo-expanded");
 
-    const summary = document.createElement("div");
-    summary.className = "sysinfo-summary";
+    // Dynamic CPU detection from board compatible string
+    let cpuModel = "MediaTek MT798x";
+    const compat = (boardInfo.compatible || "").toLowerCase();
+    if (compat.includes("mt7981")) {
+        cpuModel = "MediaTek MT7981";
+    } else if (compat.includes("mt7986")) {
+        cpuModel = "MediaTek MT7986";
+    } else if (compat.includes("mt7988")) {
+        cpuModel = "MediaTek MT7988";
+    }
 
-    const boardLine = document.createElement("div");
-    boardLine.className = "sysinfo-line";
-    boardLine.textContent = t("sysinfo.board") + " " + (boardInfo.model || t("sysinfo.unknown"));
-    summary.appendChild(boardLine);
+    // Dynamic RAM calculation
+    const ramSize = (ramInfo.size !== undefined && ramInfo.size !== null && ramInfo.size !== 0)
+        ? bytesToHuman(ramInfo.size)
+        : t("sysinfo.unknown");
 
-    const ramLine = document.createElement("div");
-    ramLine.className = "sysinfo-line";
-    ramLine.textContent = t("sysinfo.ram") + " " + (ramInfo.size !== undefined && ramInfo.size !== null && ramInfo.size !== 0 ? bytesToHuman(ramInfo.size) : t("sysinfo.unknown"));
-    summary.appendChild(ramLine);
-
-    if (sysinfoData.storage && sysinfoData.storage.mtd_layout) {
-        mtdSummary = sysinfoData.storage.mtd_layout || {};
-        if (mtdSummary.current) {
-            const curLayoutLine = document.createElement("div");
-            curLayoutLine.className = "sysinfo-line";
-            curLayoutLine.textContent = t("sysinfo.mtd.current", "MTD layout") + " " + mtdSummary.current;
-            summary.appendChild(curLayoutLine);
+    // Dynamic Flash calculation from backupinfo
+    let flashInfo = "SPI Flash";
+    if (APP_STATE.backupinfo && APP_STATE.backupinfo.mtd && APP_STATE.backupinfo.mtd.present) {
+        const mtdInfo = APP_STATE.backupinfo.mtd;
+        const model = mtdInfo.model || "";
+        // Find master device size or sum of sizes of master devices
+        let sizeBytes = 0;
+        if (mtdInfo.parts) {
+            mtdInfo.parts.forEach(p => {
+                if (p.master) sizeBytes = Math.max(sizeBytes, p.size || 0);
+            });
         }
+        const sizeStr = sizeBytes > 0 ? " " + bytesToHuman(sizeBytes) : "";
+        flashInfo = model + sizeStr;
+    } else if (sysinfoData.storage && sysinfoData.storage.mtd_layout && sysinfoData.storage.mtd_layout.current_parts) {
+        // Fallback: estimate from layouts or partition list
+        flashInfo = "SPI NAND/NOR";
     }
 
-    sysinfoContainer.appendChild(summary);
+    const macAddress = sysinfoData.mac || t("sysinfo.unknown");
+    const boardModel = boardInfo.model || t("sysinfo.unknown");
+    const versionStr = sysinfoData.version || t("sysinfo.unknown");
+    const buildDate = sysinfoData.build_date || t("sysinfo.unknown");
 
-    const details = document.createElement("details");
-    details.className = "sysinfo-details";
+    // Create the LeBOOT-style table
+    const table = document.createElement("table");
+    table.className = "sysinfo-table";
 
-    const summaryNode = document.createElement("summary");
-    summaryNode.textContent = t("sysinfo.more", "More info");
-    details.appendChild(summaryNode);
+    const rows = [
+        { key: "Процессор", val: cpuModel },
+        { key: "ОЗУ", val: ramSize },
+        { key: "Флеш-память", val: flashInfo },
+        { key: "MAC-адрес", val: macAddress },
+        { key: "Модель", val: boardModel },
+        { key: "Версия", val: versionStr },
+        { key: "Дата сборки", val: buildDate }
+    ];
 
-    const extra = document.createElement("div");
-    extra.className = "sysinfo-extra";
+    rows.forEach(r => {
+        const tr = document.createElement("tr");
+        
+        const tdKey = document.createElement("td");
+        tdKey.className = "key";
+        tdKey.textContent = r.key;
+        tr.appendChild(tdKey);
 
-    if (sysinfoData.storage && sysinfoData.storage.mtd_layout) {
-        if (mtdSummary.current_parts) {
-            const curPartsLine = document.createElement("div");
-            curPartsLine.className = "sysinfo-line sysinfo-mtdparts";
-            curPartsLine.textContent = t("sysinfo.mtd.parts", "MTD parts") + " " + mtdSummary.current_parts;
-            extra.appendChild(curPartsLine);
-        }
-    }
+        const tdVal = document.createElement("td");
+        tdVal.className = "val";
+        tdVal.textContent = r.val;
+        tr.appendChild(tdVal);
 
-    if (sysinfoData.build_variant) {
-        const variantLine = document.createElement("div");
-        variantLine.className = "sysinfo-line";
-        variantLine.textContent = t("sysinfo.variant", "Variant") + " " + sysinfoData.build_variant;
-        extra.appendChild(variantLine);
-    }
+        table.appendChild(tr);
+    });
 
-    if (boardInfo.compatible) {
-        const compatLine = document.createElement("div");
-        compatLine.className = "sysinfo-line";
-        compatLine.textContent = t("sysinfo.compat", "Compatible") + " " + boardInfo.compatible;
-        extra.appendChild(compatLine);
-    }
-
-    if (sysinfoData.storage && sysinfoData.storage.mtd_layout) {
-        const mtdLayoutInfo = sysinfoData.storage.mtd_layout || {};
-        const layouts = mtdLayoutInfo.layouts || [];
-        if (layouts && layouts.length) {
-            const layoutTitle = document.createElement("div");
-            layoutTitle.className = "sysinfo-line sysinfo-section";
-            layoutTitle.textContent = t("sysinfo.mtd.layouts", "MTD layouts");
-            extra.appendChild(layoutTitle);
-
-            const layoutList = document.createElement("ul");
-            layoutList.className = "sysinfo-list";
-            for (let layoutIndex = 0; layoutIndex < layouts.length; layoutIndex++) {
-                const item = layouts[layoutIndex] || {};
-                const entry = document.createElement("li");
-                const parts = item.parts ? " " + item.parts : "";
-                entry.textContent = (item.label || "-") + ":" + parts;
-                layoutList.appendChild(entry);
-            }
-            extra.appendChild(layoutList);
-        }
-    }
-
-    if (sysinfoData.storage && sysinfoData.storage.mmc && sysinfoData.storage.mmc.present) {
-        const mmcInfo = sysinfoData.storage.mmc;
-        const mmcTitle = document.createElement("div");
-        mmcTitle.className = "sysinfo-line sysinfo-section";
-        mmcTitle.textContent = t("sysinfo.mmc", "MMC partitions");
-        extra.appendChild(mmcTitle);
-
-        if (mmcInfo.parts && mmcInfo.parts.length) {
-            const list = document.createElement("ul");
-            list.className = "sysinfo-list";
-            for (let partitionIndex = 0; partitionIndex < mmcInfo.parts.length; partitionIndex++) {
-                const partition = mmcInfo.parts[partitionIndex];
-                const listItem = document.createElement("li");
-                const sizeText = partition.size ? bytesToHuman(partition.size) : t("sysinfo.unknown");
-                listItem.textContent = (partition.name || "-") + " (" + sizeText + ")";
-                list.appendChild(listItem);
-            }
-            extra.appendChild(list);
-        } else {
-            const empty = document.createElement("div");
-            empty.className = "sysinfo-line";
-            empty.textContent = t("sysinfo.mmc.none", "No partitions");
-            extra.appendChild(empty);
-        }
-    }
-
-    if (extra.childNodes.length) {
-        details.appendChild(extra);
-        sysinfoContainer.appendChild(details);
-
-        const toggleExpanded = () => {
-            details.open ? sysinfoContainer.classList.add("sysinfo-expanded") : sysinfoContainer.classList.remove("sysinfo-expanded");
-        };
-        details.addEventListener("toggle", toggleExpanded);
-        toggleExpanded();
-    }
+    sysinfoContainer.appendChild(table);
 }
 
 function getSysInfo() {

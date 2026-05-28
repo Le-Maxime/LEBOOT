@@ -64,8 +64,8 @@ config FSTHEME_GL
 config FSTHEME_MTK
 	bool "mtk"
 
-config FSTHEME_DARKASSASSIN
-	bool "darkassassin"
+config FSTHEME_LEBOOT
+	bool "leboot"
 endchoice
 
 config MULTI_LAYOUT

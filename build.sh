@@ -323,9 +323,9 @@ if [ "$FSTHEME" = "mtk" ] || [ "$FSTHEME" = "MTK" ]; then
 	echo "Build u-boot with mtk fstheme!"
 	echo "CONFIG_WEBUI_FAILSAFE_UI_MTK=y" >> "$UBOOT_DIR/.config"
 fi
-if [ "$FSTHEME" = "darkassassin" ] || [ "$FSTHEME" = "DarkAssassin" ]; then
-	echo "Build u-boot with darkassassin fstheme!"
-	echo "CONFIG_WEBUI_FAILSAFE_UI_DARKASSASSIN=y" >> "$UBOOT_DIR/.config"
+if [ "$FSTHEME" = "leboot" ] || [ "$FSTHEME" = "LEBOOT" ]; then
+	echo "Build u-boot with leboot fstheme!"
+	echo "CONFIG_WEBUI_FAILSAFE_UI_LEBOOT=y" >> "$UBOOT_DIR/.config"
 fi
 if [ "$simg" = "1" ]; then
 	echo "Build u-boot with failsafe simg support!"

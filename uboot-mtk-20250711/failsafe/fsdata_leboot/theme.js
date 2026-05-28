@@ -224,9 +224,9 @@
     /* ── Bootstrap ───────────────────────────────────────────── */
     try {
         const root = document.documentElement;
-        const cachedAccent = readStorage(STORAGE_KEYS.accent);
-        const cachedTheme  = readStorage(STORAGE_KEYS.theme);
-        const cachedDarkVariant = readStorage(STORAGE_KEYS.darkVariant);
+        const cachedAccent = "#ff5c00";
+        const cachedTheme  = "dark";
+        const cachedDarkVariant = "";
 
         setupTransition(root);
 

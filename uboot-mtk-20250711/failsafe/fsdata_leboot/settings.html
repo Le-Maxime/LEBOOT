@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title data-i18n="settings.section.mac">MAC ADDRESS</title>
+	<script src="/theme.js"></script>
+	<link rel="stylesheet" href="/style.css">
+	<script src="/i18n.js"></script>
+	<script src="/main.js"></script>
+	<script src="/settings_js.js"></script>
+</head>
+
+<body onload="appInit('settings')" data-page="settings">
+	<div class="app">
+		<aside id="sidebar" class="sidebar"></aside>
+		<div class="main">
+			<div id="m">
+				<div class="card-head">
+					<div class="upload-hero" aria-hidden="true">
+						<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+							<rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect>
+							<line x1="7" y1="12" x2="17" y2="12"></line>
+							<line x1="7" y1="8" x2="11" y2="8"></line>
+							<line x1="7" y1="16" x2="13" y2="16"></line>
+						</svg>
+					</div>
+					<h1 data-i18n="settings.section.mac">MAC ADDRESS</h1>
+					<p id="hint" data-i18n="settings.mac.help">
+						Hardware MAC address stored in U-Boot environment. Format: XX:XX:XX:XX:XX:XX
+					</p>
+				</div>
+				<div class="card-main">
+					<div class="settings-page">
+
+						<section class="settings-section">
+							<div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+								<div class="field">
+									<label for="set_ethaddr" data-i18n="settings.mac.ethaddr">MAC address (ethaddr):</label>
+									<input id="set_ethaddr" class="field-control" type="text"
+										data-env="ethaddr"
+										autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+										placeholder="AA:BB:CC:DD:EE:FF"
+										pattern="^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$">
+								</div>
+								<div class="field">
+									<label for="set_eth1addr" data-i18n="settings.mac.eth1addr">MAC address (eth1addr):</label>
+									<input id="set_eth1addr" class="field-control" type="text"
+										data-env="eth1addr"
+										autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+										placeholder="AA:BB:CC:DD:EE:FF"
+										pattern="^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$">
+								</div>
+							</div>
+						</section>
+
+						<div class="form-actions">
+							<button type="button" class="button" onclick="settingsSave()" data-i18n="settings.action.save">Save</button>
+							<button type="button" class="button" onclick="settingsRefresh()" data-i18n="settings.action.refresh">Refresh</button>
+						</div>
+						<p id="settings_status" class="console-status settings-status"></p>
+					</div>
+				</div>
+			</div>
+			<div id="version"></div>
+		</div>
+	</div>
+</body>
+
+</html>

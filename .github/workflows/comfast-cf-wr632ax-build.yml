@@ -54,7 +54,7 @@ jobs:
           cd bl-mt798x-dhcpd
           
           # Run build command for the specific board
-          make BOARD=comfast_cf-wr632ax VERSION=SP2 VARIANT=ubootmod FSTHEME=darkassassin
+          make BOARD=comfast_cf-wr632ax VERSION=SP2 VARIANT=ubootmod FSTHEME=leboot
 
           echo "FILE_DATE=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
