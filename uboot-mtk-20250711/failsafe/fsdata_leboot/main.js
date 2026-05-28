@@ -950,7 +950,8 @@ function renderSysInfo() {
         flashInfo = "SPI NAND/NOR";
     }
 
-    const macAddress = sysinfoData.mac || t("sysinfo.unknown");
+    const macWan  = sysinfoData.mac_wan || sysinfoData.mac || t("sysinfo.unknown");
+    const macLan  = sysinfoData.mac_lan || t("sysinfo.unknown");
     const boardModel = boardInfo.model || t("sysinfo.unknown");
     const versionStr = sysinfoData.version || t("sysinfo.unknown");
     const buildDate = sysinfoData.build_date || t("sysinfo.unknown");
@@ -963,7 +964,8 @@ function renderSysInfo() {
         { key: "Процессор", val: cpuModel },
         { key: "ОЗУ", val: ramSize },
         { key: "Флеш-память", val: flashInfo },
-        { key: "MAC-адрес", val: macAddress },
+        { key: "MAC WAN", val: macWan },
+        { key: "MAC LAN", val: macLan },
         { key: "Модель", val: boardModel },
         { key: "Версия", val: versionStr },
         { key: "Дата сборки", val: buildDate }

@@ -386,7 +386,8 @@ static void sysinfo_handler(enum httpd_uri_handler_status status,
 	json_escape(esc_board_compat, sizeof(esc_board_compat), board_compat ? board_compat : "");
 	json_escape(esc_build_variant, sizeof(esc_build_variant), build_variant ? build_variant : "");
 
-	const char *ethaddr = env_get("ethaddr");
+	const char *ethaddr  = env_get("ethaddr");
+	const char *eth1addr = env_get("eth1addr");
 	const char *git_hash = WEBUI_FAILSAFE_GIT_HASH;
 	bool dirty = !!WEBUI_FAILSAFE_GIT_DIRTY;
 
@@ -403,6 +404,12 @@ static void sysinfo_handler(enum httpd_uri_handler_status status,
 	len += snprintf(buf + len, left - len,
 					"\"mac\":\"%s\",",
 					ethaddr ? ethaddr : "");
+	len += snprintf(buf + len, left - len,
+					"\"mac_wan\":\"%s\",",
+					ethaddr ? ethaddr : "");
+	len += snprintf(buf + len, left - len,
+					"\"mac_lan\":\"%s\",",
+					eth1addr ? eth1addr : "");
 	len += snprintf(buf + len, left - len,
 					"\"version\":\"LE-01 [%s%s]\",",
 					git_hash ? git_hash : "unknown",
