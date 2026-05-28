@@ -536,7 +536,8 @@ function ensureSidebar() {
         image: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`,
         download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
         edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
-        terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`
+        terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`,
+        database: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path></svg>`
     };
 
     // Navigation Container
@@ -582,6 +583,10 @@ function ensureSidebar() {
     simgLink.style.display = "none";
     advancedSection.appendChild(simgLink);
 
+    const ubiLink = createNavLink("/ubi.html", "nav.ubi", "ubi", svgs.database);
+    ubiLink.style.display = "none";
+    advancedSection.appendChild(ubiLink);
+
     advancedSection.appendChild(createNavLink("/factory.html", "nav.factory", "factory", svgs.rotate));
     advancedSection.appendChild(createNavLink("/backup.html", "nav.backup", "backup", svgs.download));
     advancedSection.appendChild(createNavLink("/flash.html", "nav.flash", "flash", svgs.edit));
@@ -595,6 +600,7 @@ function ensureSidebar() {
     applyI18n(sidebar);
     updateGptNavVisibility();
     updateSimgNavVisibility();
+    updateUbiNavVisibility();
     updateSettingsNavVisibility();
     attachSidebarScrollPersistence(navContainer);
 }
@@ -899,6 +905,25 @@ function updateSimgNavVisibility() {
         .then((response) => {
             if (response?.ok) {
                 simgNavLink.style.display = "";
+            }
+        })
+        .catch(() => {});
+}
+
+function updateUbiNavVisibility() {
+    // Hide UBI entry unless the page is actually served.
+    const ubiNavLink = document.querySelector("#sidebar [data-nav-id='ubi']");
+    if (!ubiNavLink) return;
+    ubiNavLink.style.display = "none";
+
+    // Avoid repeated probes.
+    if (APP_STATE._ubi_probe_done) return;
+    APP_STATE._ubi_probe_done = true;
+
+    fetch("/ubi.html?_probe=1", { method: "GET", cache: "no-store" })
+        .then((response) => {
+            if (response?.ok) {
+                ubiNavLink.style.display = "";
             }
         })
         .catch(() => {});
