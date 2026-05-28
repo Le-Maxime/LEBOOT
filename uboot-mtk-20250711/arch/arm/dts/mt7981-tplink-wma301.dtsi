@@ -23,7 +23,7 @@
 			label = "default";
 			// mtd layout immortalwrt/openwrt 114M ubi firmware
 			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),1024k(art),1024k(Factory),2048k(fip),114688k(ubi)";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),1024k(art),1024k(Factory),2048k(fip),116736k(ubi)";
 		};
 
 		layout@1 {
