@@ -4,7 +4,10 @@
 > **LEBOOT** является неофициальным премиальным редизайном (модификацией интерфейса и темы) для аварийного веб-интерфейса U-Boot (Failsafe Web UI) на устройствах MediaTek MT798x.
 >
 > Проект основан на оригинальном репозитории: [Yuzhii0718/bl-mt798x-dhcpd](https://github.com/Yuzhii0718/bl-mt798x-dhcpd)
-> Базовый коммит оригинала: [`26440ae87fd4fe157325aa96314b323de8ff6cb9`](https://github.com/Yuzhii0718/bl-mt798x-dhcpd/commit/26440ae87fd4fe157325aa96314b323de8ff6cb9) (*"uboot: Move web failsafe UI URL printout to start_web_failsafe()"*)
+>
+> Базовый коммит оригинала: [`26440ae87fd4fe157325aa96314b323de8ff6cb9`](https://github.com/Yuzhii0718/bl-mt798x-dhcpd/commit/26440ae87fd4fe157325aa96314b323de8ff6cb9)
+>
+> Название базового коммита: *"uboot: Move web failsafe UI URL printout to start_web_failsafe()"*
 
 ---
 
