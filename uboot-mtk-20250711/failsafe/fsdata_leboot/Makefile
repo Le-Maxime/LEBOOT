@@ -73,6 +73,10 @@ obj-y += uboot.o
 FILE_uboot.o := .min/uboot.html.gz
 FSPATH_uboot.o := uboot.html
 
+obj-y += upgrade.o
+FILE_upgrade.o := .min/upgrade.html.gz
+FSPATH_upgrade.o := upgrade.html
+
 obj-y += favicon.o
 FILE_favicon.o := .min/favicon.svg.gz
 FSPATH_favicon.o := favicon.svg

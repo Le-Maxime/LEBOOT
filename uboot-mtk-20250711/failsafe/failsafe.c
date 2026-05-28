@@ -1182,6 +1182,7 @@ int start_web_failsafe(void)
 	httpd_register_uri_handler(inst, "/", &index_handler, NULL);
 	httpd_register_uri_handler(inst, "/bl2.html", &html_handler, NULL);
 	httpd_register_uri_handler(inst, "/booting.html", &html_handler, NULL);
+	httpd_register_uri_handler(inst, "/upgrade.html", &html_handler, NULL);
 	httpd_register_uri_handler(inst, "/cgi-bin/luci", &index_handler, NULL);
 	httpd_register_uri_handler(inst, "/cgi-bin/luci/", &index_handler, NULL);
 	httpd_register_uri_handler(inst, "/fail.html", &html_handler, NULL);
