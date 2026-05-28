@@ -243,8 +243,8 @@ esac
 info "Вычисляем контрольную сумму FIP..."
 md5sum "$FIP_FILE"
 
-info "Стираем и записываем FIP в \033[1m$MTD_FIP\033[0m..."
-mtd write "$FIP_FILE" "$MTD_FIP"
+info "Стираем и записываем FIP в \033[1m/dev/$MTD_FIP\033[0m..."
+mtd write "$FIP_FILE" "/dev/$MTD_FIP"
 success "Раздел FIP (U-Boot) успешно прошит!"
 
 echo ""
