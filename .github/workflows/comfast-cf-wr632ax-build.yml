@@ -85,7 +85,7 @@ jobs:
         uses: actions/upload-artifact@main
         if: steps.organize.outputs.status == 'success' && !cancelled()
         with:
-          name: ${{ env.FILE_DATE }}-comfast_cf-wr632ax-SP2-ubootmod
+          name: ${{ env.FILE_DATE }}-LEBOOT
           path: |
             bl-mt798x-dhcpd/upload/*
 
@@ -97,17 +97,15 @@ jobs:
           set -euo pipefail
           touch release.txt
 
-          echo "- Commit: ${{ github.sha }}" >> release.txt
-          echo "- Target model: comfast_cf-wr632ax" >> release.txt
-          echo "- Version: SP2" >> release.txt
-          echo "- Variant: ubootmod" >> release.txt
-          echo "- Build time: ${{ env.FILE_DATE }}" >> release.txt
+          echo "- Коммит: ${{ github.sha }}" >> release.txt
+          echo "- Версия: LEBOOT v1.0" >> release.txt
+          echo "- Время сборки: ${{ env.FILE_DATE }}" >> release.txt
 
           echo "" >> release.txt
           echo "---" >> release.txt
           echo "" >> release.txt
-          echo "**PLEASE SEE THE README FOR USAGE INSTRUCTIONS AND DISCLAIMERS.**" >> release.txt
-          echo "release_tag=${{ env.FILE_DATE }}-comfast_cf-wr632ax-SP2-ubootmod" >> $GITHUB_OUTPUT
+          echo "**ИНСТРУКЦИИ ПО ИСПОЛЬЗОВАНИЮ И ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ СМОТРИТЕ В README.**" >> release.txt
+          echo "release_tag=${{ env.FILE_DATE }}-LEBOOT" >> $GITHUB_OUTPUT
           echo "status=success" >> $GITHUB_OUTPUT
 
       - name: Publish to GitHub Release
@@ -117,7 +115,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: bl-mt798x-dhcpd/upload/*
-          release_name: ${{ env.FILE_DATE }}-comfast_cf-wr632ax-SP2-ubootmod
-          name: ${{ env.FILE_DATE }}-comfast_cf-wr632ax-SP2-ubootmod
+          release_name: ${{ env.FILE_DATE }}-LEBOOT
+          name: ${{ env.FILE_DATE }}-LEBOOT
           tag_name: ${{ steps.tag.outputs.release_tag }}
           body_path: release.txt
