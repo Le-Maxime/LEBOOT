@@ -132,7 +132,7 @@ case "$dl_confirm" in
         info "Проверяем подключение к интернету и запрашиваем список релизов..."
         
         # Получаем JSON последнего релиза
-        GITHUB_API="https://api.github.com/repos/DarkAssassinUA/bl-mt798x-dhcpd/releases/latest"
+        GITHUB_API="https://api.github.com/repos/DarkAssassinUA/LEBOOT/releases/latest"
         json=""
         if command -v curl >/dev/null 2>&1; then
             json=$(curl -s -L "$GITHUB_API")
