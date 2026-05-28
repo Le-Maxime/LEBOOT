@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Скрипт для безопасной прошивки загрузчика (BL2 и FIP) на устройствах MediaTek MT798x
+# Скрипт для безопасной прошивки загрузчика (FIP / U-Boot) на устройствах MediaTek MT798x
 # Разработан специально для comfast_cf-wr632ax и аналогичных плат.
 # Автоматически загружает последнюю версию сборки прямо с GitHub!
 #
@@ -41,23 +41,11 @@ fi
 find_mtd_partition() {
     local name="$1"
     local dev=$(grep -i "\"$name\"" /proc/mtd | cut -d':' -f1)
-    if [ -z "$dev" ]; then
-        if [ "$name" = "bl2" ]; then
-            dev=$(grep -i '"preloader"' /proc/mtd | cut -d':' -f1)
-        fi
-    fi
     echo "$dev"
 }
 
-# Определение MTD разделов
-MTD_BL2=$(find_mtd_partition "bl2")
+# Определение MTD раздела FIP
 MTD_FIP=$(find_mtd_partition "fip")
-
-if [ -n "$MTD_BL2" ]; then
-    info "Найден раздел BL2 (Preloader): \033[1m$MTD_BL2\033[0m"
-else
-    warn "Раздел BL2 не найден. Скрипт обновит только FIP (U-Boot)."
-fi
 
 if [ -n "$MTD_FIP" ]; then
     info "Найден раздел FIP (U-Boot): \033[1m$MTD_FIP\033[0m"
@@ -87,11 +75,16 @@ case "$dl_confirm" in
             error "Не удалось получить список релизов с GitHub. Проверьте настройки сети на роутере."
         fi
         
-        # Фильтруем ссылки для нашего комфаста
-        urls=$(echo "$json" | grep -oE 'https://github.com/[^"]+' | grep -E '\.(bin|img)$' | grep -i 'cf-wr632ax' || true)
+        # Фильтруем ссылки для FIP под наш комфаст
+        urls=$(echo "$json" | grep -oE 'https://github.com/[^"]+' | grep -E '\.bin$' | grep -i 'cf-wr632ax' | grep -i 'fip' || true)
         
         if [ -z "$urls" ]; then
-            error "Не найдены скомпилированные файлы для Comfast CF-WR632AX в последнем релизе!"
+            # Попробуем без ключевого слова 'fip', вдруг имя другое
+            urls=$(echo "$json" | grep -oE 'https://github.com/[^"]+' | grep -E '\.bin$' | grep -i 'cf-wr632ax' || true)
+        fi
+        
+        if [ -z "$urls" ]; then
+            error "Не найдены скомпилированные файлы FIP (U-Boot) для Comfast CF-WR632AX в последнем релизе!"
         fi
         
         info "Найдены подходящие файлы для скачивания:"
@@ -151,20 +144,7 @@ select_file() {
     echo "$selected"
 }
 
-# Выбор файлов прошивки
-BL2_FILE=""
-if [ -n "$MTD_BL2" ]; then
-    BL2_FILE=$(select_file "*bl2*.img" "Найдены следующие файлы для BL2:")
-    if [ -z "$BL2_FILE" ]; then
-        BL2_FILE=$(select_file "*bl2*.bin" "Найдены следующие файлы для BL2:")
-    fi
-    if [ -z "$BL2_FILE" ]; then
-        warn "Файл BL2 не найден в текущей папке. Будет прошит только FIP."
-    else
-        info "Выбран файл BL2: \033[1m$BL2_FILE\033[0m"
-    fi
-fi
-
+# Выбор файла прошивки FIP
 FIP_FILE=$(select_file "*fip*.bin" "Найдены следующие файлы для FIP:")
 if [ -z "$FIP_FILE" ]; then
     FIP_FILE=$(select_file "*u-boot*.bin" "Найдены следующие файлы для U-Boot:")
@@ -190,17 +170,7 @@ case "$confirm" in
         ;;
 esac
 
-# 1. Прошивка BL2
-if [ -n "$MTD_BL2" ] && [ -n "$BL2_FILE" ]; then
-    info "Вычисляем контрольную сумму BL2..."
-    md5sum "$BL2_FILE"
-    
-    info "Стираем и записываем BL2 в \033[1m$MTD_BL2\033[0m..."
-    mtd write "$BL2_FILE" "$MTD_BL2"
-    success "Раздел BL2 успешно прошит!"
-fi
-
-# 2. Прошивка FIP
+# Прошивка FIP
 info "Вычисляем контрольную сумму FIP..."
 md5sum "$FIP_FILE"
 
@@ -208,7 +178,7 @@ info "Стираем и записываем FIP в \033[1m$MTD_FIP\033[0m..."
 mtd write "$FIP_FILE" "$MTD_FIP"
 success "Раздел FIP (U-Boot) успешно прошит!"
 
-# 3. Очистка UBI (для NAND устройств)
+# Очистка UBI (для NAND устройств)
 MTD_UBI=$(find_mtd_partition "ubi")
 if [ -n "$MTD_UBI" ]; then
     echo ""
