@@ -12,7 +12,7 @@ on:
 env:
   REPO_URL: 'https://github.com/DarkAssassinUA/bl-mt798x-dhcpd'
   REPO_BRANCH: 'master'
-  TZ: Asia/Shanghai
+  TZ: Europe/Kyiv
   UPLOAD_ARTIFACT: true
   UPLOAD_RELEASE: true
 

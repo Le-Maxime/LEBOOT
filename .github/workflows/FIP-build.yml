@@ -103,7 +103,7 @@ env:
   SSH_ACTIONS: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
-  TZ: Asia/Shanghai
+  TZ: Europe/Kyiv
   # Build configuration from inputs
   CONFIG_MODEL: ${{ github.event.inputs.MODEL }}
   CONFIG_VARIANT: ${{ github.event.inputs.VARIANT || 'default' }}

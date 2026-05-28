@@ -46,7 +46,7 @@ on:
 env:
   REPO_URL: ${{ github.event.inputs.REPO_URL }}
   REPO_BRANCH: ${{ github.event.inputs.REPO_BRANCH }}
-  TZ: Asia/Shanghai
+  TZ: Europe/Kyiv
   UPLOAD_ARTIFACT: true
   UPLOAD_RELEASE: true
   # Build configuration from inputs
