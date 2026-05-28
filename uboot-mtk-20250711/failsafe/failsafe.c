@@ -411,7 +411,7 @@ static void sysinfo_handler(enum httpd_uri_handler_status status,
 					"\"mac_lan\":\"%s\",",
 					eth1addr ? eth1addr : "");
 	len += snprintf(buf + len, left - len,
-					"\"version\":\"LE-01 [%s%s]\",",
+					"\"version\":\"LE-1.2 [%s%s]\",",
 					git_hash ? git_hash : "unknown",
 					dirty ? "-dirty" : "");
 	len += snprintf(buf + len, left - len,
