@@ -986,6 +986,7 @@ static const char *select_js_file(const char *uri)
 		"env_js.js",
 		"flash_js.js",
 		"settings_js.js",
+		"ubi_js.js",
 		NULL
 	};
 	const char *basename;
@@ -1195,9 +1196,8 @@ int start_web_failsafe(void)
 	httpd_register_uri_handler(inst, "/fail.html", &html_handler, NULL);
 	httpd_register_uri_handler(inst, "/flashing.html", &html_handler, NULL);
 	httpd_register_uri_handler(inst, "/getmtdlayout", &mtd_layout_handler, NULL);
-#ifdef CONFIG_MTK_BOOTMENU_MMC
-	if (failsafe_mmc_present())
-		httpd_register_uri_handler(inst, "/gpt.html", &html_handler, NULL);
+#ifdef CONFIG_WEBUI_FAILSAFE_GPT
+	httpd_register_uri_handler(inst, "/gpt.html", &html_handler, NULL);
 #endif
 	httpd_register_uri_handler(inst, "/initramfs.html", &html_handler, NULL);
 	httpd_register_uri_handler(inst, "/main.js", &js_handler, NULL);
@@ -1249,6 +1249,19 @@ int start_web_failsafe(void)
 #endif
 #ifdef CONFIG_WEBUI_FAILSAFE_SIMG
 	httpd_register_uri_handler(inst, "/simg.html", &html_handler, NULL);
+#endif
+#ifdef CONFIG_WEBUI_FAILSAFE_UBI
+	httpd_register_uri_handler(inst, "/ubi.html", &html_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi_js.js", &js_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi/info", &ubi_info_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi/volumes", &ubi_volumes_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi/attach", &ubi_attach_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi/detach", &ubi_detach_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi/create", &ubi_create_vol_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi/remove", &ubi_remove_vol_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi/rename", &ubi_rename_vol_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi/mtd_list", &ubi_mtd_list_handler, NULL);
+	httpd_register_uri_handler(inst, "/ubi/backup", &ubi_backup_handler, NULL);
 #endif
 #ifdef CONFIG_WEBUI_FAILSAFE_FACTORY
 	httpd_register_uri_handler(inst, "/factory.html", &html_handler, NULL);

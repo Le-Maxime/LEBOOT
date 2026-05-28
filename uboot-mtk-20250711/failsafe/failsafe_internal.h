@@ -78,4 +78,34 @@ void flash_handler(enum httpd_uri_handler_status status,
 	struct httpd_response *response);
 #endif
 
+#ifdef CONFIG_WEBUI_FAILSAFE_UBI
+void ubi_info_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void ubi_volumes_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void ubi_attach_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void ubi_detach_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void ubi_create_vol_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void ubi_remove_vol_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void ubi_rename_vol_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void ubi_mtd_list_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void ubi_backup_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+#endif
+
 #endif /* _FAILSAFE_INTERNAL_H_ */

@@ -80,6 +80,10 @@ config SIMG
 	bool "Enable SIMG packaging"
 	default n
 
+config UBIMNG
+	bool "Enable UBI management in failsafe"
+	default n
+
 config COPY_BL2
 	bool "Copy BL2 after build"
 	default y

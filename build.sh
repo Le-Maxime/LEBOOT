@@ -12,6 +12,7 @@ FSTHEME=${FSTHEME:-bootstrap}
 fixedparts=${FIXED_MTDPARTS:-1}
 multilayout=${MULTI_LAYOUT:-0}
 simg=${SIMG:-0}
+UBIMNG=${UBIMNG:-0}
 COPY_BL2=${COPY_BL2:-1}
 
 if [ "$VERSION" = "2025" ]; then
@@ -52,7 +53,7 @@ if [ "$CLEAN" = "1" ]; then
 fi
 
 if [ -z "$BOARD" ]; then
-	echo "Usage: BOARD=<board name> [SOC=mt7981|mt7986|mt7987|mt7988] VERSION=[2025|SP1|SP2] VARIANT=[default|ubootmod|nonmbm] $0"
+	echo "Usage: BOARD=<board name> [SOC=mt7981|mt7986|mt7987|mt7988] VERSION=[2025|SP1|SP2] VARIANT=[default|ubootmod|nonmbm] [UBIMNG=1] $0"
 	echo "eg: BOARD=cmcc_a10 $0"
 	echo "eg: BOARD=cmcc_a10 VARIANT=ubootmod $0"
 	echo "eg: BOARD=sn_r1 VERSION=2025 $0"
@@ -294,7 +295,7 @@ echo "U-Boot Dir: $UBOOT_DIR"
 echo "ATF CFG: $ATF_CFG_PATH"
 echo "U-Boot CFG: $UBOOT_CFG_PATH"
 echo "Features: fixed-mtdparts: $fixedparts, multi-layout: $multilayout"
-echo "Failsafe: theme: $FSTHEME, simg support: $simg"
+echo "Failsafe: theme: $FSTHEME, simg support: $simg, ubi manger support: $UBIMNG"
 echo "COPY BL2: $COPY_BL2"
 
 echo "======================================================================"
@@ -330,6 +331,10 @@ fi
 if [ "$simg" = "1" ]; then
 	echo "Build u-boot with failsafe simg support!"
 	echo "CONFIG_WEBUI_FAILSAFE_SIMG=y" >> "$UBOOT_DIR/.config"
+fi
+if [ "$UBIMNG" = "1" ]; then
+	echo "Build u-boot with failsafe UBI management support!"
+	echo "CONFIG_WEBUI_FAILSAFE_UBI=y" >> "$UBOOT_DIR/.config"
 fi
 
 make -C "$UBOOT_DIR" olddefconfig

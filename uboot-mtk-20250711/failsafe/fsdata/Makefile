@@ -45,7 +45,7 @@ obj-y += flashing.o
 FILE_flashing.o := .min/flashing.html.gz
 FSPATH_flashing.o := flashing.html
 
-obj-y += gpt.o
+obj-$(CONFIG_WEBUI_FAILSAFE_GPT) += gpt.o
 FILE_gpt.o := .min/gpt.html.gz
 FSPATH_gpt.o := gpt.html
 
@@ -68,6 +68,10 @@ FSPATH_settings.o := settings.html
 obj-$(CONFIG_WEBUI_FAILSAFE_SIMG) += simg.o
 FILE_simg.o := .min/simg.html.gz
 FSPATH_simg.o := simg.html
+
+obj-$(CONFIG_WEBUI_FAILSAFE_UBI) += ubi.o
+FILE_ubi.o := .min/ubi.html.gz
+FSPATH_ubi.o := ubi.html
 
 obj-y += uboot.o
 FILE_uboot.o := .min/uboot.html.gz
@@ -112,6 +116,10 @@ FSPATH_main.o := main.js
 obj-$(CONFIG_WEBUI_FAILSAFE_ENV) += settings_js.o
 FILE_settings_js.o := .min/settings_js.js.gz
 FSPATH_settings_js.o := settings_js.js
+
+obj-$(CONFIG_WEBUI_FAILSAFE_UBI) += ubi_js.o
+FILE_ubi_js.o := .min/ubi_js.js.gz
+FSPATH_ubi_js.o := ubi_js.js
 
 obj-y += theme.o
 FILE_theme.o := .min/theme.js.gz

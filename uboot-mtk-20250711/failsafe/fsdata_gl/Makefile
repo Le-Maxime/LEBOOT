@@ -33,7 +33,7 @@ obj-y += flashing.o
 FILE_flashing.o := .min/flashing.html.gz
 FSPATH_flashing.o := flashing.html
 
-obj-y += gpt.o
+obj-$(CONFIG_WEBUI_FAILSAFE_GPT) += gpt.o
 FILE_gpt.o := .min/gpt.html.gz
 FSPATH_gpt.o := gpt.html
 

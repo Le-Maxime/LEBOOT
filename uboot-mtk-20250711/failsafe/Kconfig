@@ -86,6 +86,16 @@ config WEBUI_FAILSAFE_FLASH
 
 	  WARNING: This is a dangerous feature and may brick the device.
 
+config WEBUI_FAILSAFE_GPT
+	bool "Enable GPT partition table update"
+	default y if MTK_BOOTMENU_MMC
+	depends on WEBUI_FAILSAFE && MTK_BOOTMENU_MMC
+	help
+	  Enable GPT partition table update in the failsafe Web UI.
+	  This allows update of the GPT partition table from a file upload.
+
+	  WARNING: This is a dangerous feature and may brick the device.
+
 config WEBUI_FAILSAFE_ENV
 	bool "Enable U-Boot environment management (DANGEROUS)"
 	default y
@@ -123,6 +133,15 @@ config WEBUI_FAILSAFE_ENV_DEFAULT_GLBTN_KEY
 	  When enabled, failsafe environment API will automatically create
 	  and persist glbtn_key=reset,wps,mesh if glbtn_key does not exist.
 	  Existing glbtn_key values are never overwritten.
+
+config WEBUI_FAILSAFE_UBI
+	bool "Enable UBI volume management"
+	default n
+	select CMD_UBIFS
+	depends on WEBUI_FAILSAFE_ADVANCED && !MTK_BOOTMENU_MMC
+	help
+	  Enable UBI volume management in the failsafe Web UI.
+	  This allows managing UBI volumes on NAND flash devices.
 
 config WEBUI_FAILSAFE_CONSOLE
 	bool "Enable failsafe Web console (DANGEROUS)"

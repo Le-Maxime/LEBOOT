@@ -109,6 +109,9 @@ endif
 ifeq ($(origin SIMG), undefined)
   SIMG := $(if $(filter y,$(call config_bool,CONFIG_SIMG,n)),1,0)
 endif
+ifeq ($(origin UBIMNG), undefined)
+  UBIMNG := $(if $(filter y,$(call config_bool,CONFIG_UBIMNG,n)),1,0)
+endif
 ifeq ($(origin COPY_BL2), undefined)
   COPY_BL2 := $(if $(filter y,$(call config_bool,CONFIG_COPY_BL2,y)),1,0)
 endif
@@ -184,12 +187,12 @@ build:
 				env -u MAKEFLAGS -u MAKELEVEL -u MFLAGS \
 				BOARD="$$board" VERSION="$(VERSION)" VARIANT="$(VARIANT)" FSTHEME="$(FSTHEME)" \
 				MULTI_LAYOUT="$(MULTI_LAYOUT)" FIXED_MTDPARTS="$(FIXED_MTDPARTS)" SIMG="$(SIMG)" \
-				COPY_BL2="$(COPY_BL2)" SILENT="$(SILENT)" ./build.sh 2>&1 | tee "$$log_file"; \
+				UBIMNG="$(UBIMNG)" COPY_BL2="$(COPY_BL2)" SILENT="$(SILENT)" ./build.sh 2>&1 | tee "$$log_file"; \
 			else \
 				env -u MAKEFLAGS -u MAKELEVEL -u MFLAGS \
 				BOARD="$$board" VERSION="$(VERSION)" VARIANT="$(VARIANT)" FSTHEME="$(FSTHEME)" \
 				MULTI_LAYOUT="$(MULTI_LAYOUT)" FIXED_MTDPARTS="$(FIXED_MTDPARTS)" SIMG="$(SIMG)" \
-				COPY_BL2="$(COPY_BL2)" SILENT="$(SILENT)" ./build.sh; \
+				UBIMNG="$(UBIMNG)" COPY_BL2="$(COPY_BL2)" SILENT="$(SILENT)" ./build.sh; \
 			fi; \
 		}; \
 		success_count=0; \
@@ -310,12 +313,12 @@ all:
 			env -u MAKEFLAGS -u MAKELEVEL -u MFLAGS \
 			BOARD="$$board" VERSION="$(VERSION)" VARIANT="$(VARIANT)" FSTHEME="$(FSTHEME)" \
 			MULTI_LAYOUT="$(MULTI_LAYOUT)" FIXED_MTDPARTS="$(FIXED_MTDPARTS)" SIMG="$(SIMG)" \
-			COPY_BL2="$(COPY_BL2)" SILENT="$(SILENT)" ./build.sh 2>&1 | tee "$$log_file"; \
+			UBIMNG="$(UBIMNG)" COPY_BL2="$(COPY_BL2)" SILENT="$(SILENT)" ./build.sh 2>&1 | tee "$$log_file"; \
 		else \
 			env -u MAKEFLAGS -u MAKELEVEL -u MFLAGS \
 			BOARD="$$board" VERSION="$(VERSION)" VARIANT="$(VARIANT)" FSTHEME="$(FSTHEME)" \
 			MULTI_LAYOUT="$(MULTI_LAYOUT)" FIXED_MTDPARTS="$(FIXED_MTDPARTS)" SIMG="$(SIMG)" \
-			COPY_BL2="$(COPY_BL2)" SILENT="$(SILENT)" ./build.sh; \
+			UBIMNG="$(UBIMNG)" COPY_BL2="$(COPY_BL2)" SILENT="$(SILENT)" ./build.sh; \
 		fi; \
 	}; \
 	mapfile -t board_cfgs < <(collect_board_configs); \
@@ -506,6 +509,7 @@ help:
 		'  MULTI_LAYOUT=0|1' \
 		'  FIXED_MTDPARTS=0|1' \
 		'  SIMG=0|1' \
+		'  UBIMNG=0|1' \
 		'  SILENT=Y|N' \
 		'' \
 		'ATF / GPT helpers:' \
