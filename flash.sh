@@ -234,41 +234,9 @@ esac
 info "Вычисляем контрольную сумму FIP..."
 md5sum "$FIP_FILE"
 
-# Пробуем прошить: сначала через dd в /dev/mtdX, затем через mtd write по имени
-flash_fip() {
-    local file="$1"
-    local dev="$2"     # например mtd3
-    local name="$3"    # например FIP
-
-    # Способ 1: прямая запись через dd в /dev/mtdX
-    if [ -n "$dev" ] && [ -e "/dev/$dev" ]; then
-        info "Способ 1: прямая запись через dd в /dev/$dev..."
-        dd if="$file" of="/dev/$dev" bs=65536 2>&1 && return 0
-        warn "dd завершился с ошибкой, пробуем следующий метод..."
-    fi
-
-    # Способ 2: mtd write по имени раздела
-    if command -v mtd >/dev/null 2>&1; then
-        info "Способ 2: запись через mtd write \"$name\"..."
-        mtd write "$file" "$name" && return 0
-        warn "mtd write завершился с ошибкой, пробуем следующий метод..."
-    fi
-
-    # Способ 3: mtd write через /dev/mtdX
-    if [ -n "$dev" ] && command -v mtd >/dev/null 2>&1; then
-        info "Способ 3: запись через mtd write /dev/$dev..."
-        mtd write "$file" "/dev/$dev" && return 0
-    fi
-
-    return 1
-}
-
-info "Записываем FIP в раздел \033[1m$MTD_FIP_NAME\033[0m ($MTD_FIP)..."
-if flash_fip "$FIP_FILE" "$MTD_FIP" "$MTD_FIP_NAME"; then
-    success "Раздел FIP (U-Boot) успешно прошит!"
-else
-    error "Все методы прошивки завершились с ошибкой! Устройство не перезагружайте, проверьте состояние вручную."
-fi
+info "Записываем FIP в раздел \033[1m$MTD_FIP_NAME\033[0m..."
+mtd write "$FIP_FILE" "$MTD_FIP_NAME"
+success "Раздел FIP (U-Boot) успешно прошит!"
 
 echo ""
 success "========================================================"
