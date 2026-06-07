@@ -180,7 +180,7 @@ select_file() {
     echo -n "Выберите номер (1-$((i-1))): "
     read choice < /dev/tty
     
-    local selected=$(echo "$files" | cut -d' ' -f"$choice")
+    local selected=$(echo $files | cut -d' ' -f"$choice")
     if [ -z "$selected" ]; then
         error "Неверный выбор файла!"
     fi
