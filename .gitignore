@@ -45,3 +45,7 @@ migration*.py
 # Toolchain
 openwrt-toolchain*
 node_modules/
+
+# Upstream
+u-boot-*/
+*.zip
