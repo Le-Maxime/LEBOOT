@@ -90,6 +90,86 @@ static int etron_ecc_get_status(struct spinand_device *spinand,
 	return -EINVAL;
 }
 
+static int em73c044vcf_oh_ooblayout_ecc(struct mtd_info *mtd, int section,
+					struct mtd_oob_region *region)
+{
+	if (section > 3)
+		return -ERANGE;
+
+	region->offset = (16 * section) + 8;
+	region->length = 8;
+
+	return 0;
+}
+
+static int em73c044vcf_oh_ooblayout_free(struct mtd_info *mtd, int section,
+					 struct mtd_oob_region *region)
+{
+	if (section > 3)
+		return -ERANGE;
+
+	region->offset = (16 * section) + 2;
+	region->length = 6;
+
+	return 0;
+}
+
+static const struct mtd_ooblayout_ops em73c044vcf_oh_ooblayout = {
+	.ecc = em73c044vcf_oh_ooblayout_ecc,
+	.rfree = em73c044vcf_oh_ooblayout_free,
+};
+
+static int em73c044vcf_oh_ecc_get_status(struct spinand_device *spinand,
+					 u8 status)
+{
+	struct nand_device *nand = spinand_to_nand(spinand);
+
+	switch (status & STATUS_ECC_MASK) {
+	case STATUS_ECC_NO_BITFLIPS:
+		return 0;
+
+	case STATUS_ECC_UNCOR_ERROR:
+		return -EBADMSG;
+
+	case STATUS_ECC_HAS_BITFLIPS:
+		return 1;
+
+	default:
+		return nand->eccreq.strength;
+	}
+
+	return -EINVAL;
+}
+
+static int em73e044vce_oh_ooblayout_ecc(struct mtd_info *mtd, int section,
+					struct mtd_oob_region *region)
+{
+	if (section > 3)
+		return -ERANGE;
+
+	region->offset = (32 * section) + 18;
+	region->length = 14;
+
+	return 0;
+}
+
+static int em73e044vce_oh_ooblayout_free(struct mtd_info *mtd, int section,
+					 struct mtd_oob_region *region)
+{
+	if (section > 3)
+		return -ERANGE;
+
+	region->offset = (32 * section) + 2;
+	region->length = 16;
+
+	return 0;
+}
+
+static const struct mtd_ooblayout_ops em73e044vce_oh_ooblayout = {
+	.ecc = em73e044vce_oh_ooblayout_ecc,
+	.rfree = em73e044vce_oh_ooblayout_free,
+};
+
 static const struct spinand_info etron_spinand_table[] = {
 	/* EM73C 1Gb 3.3V */
 	SPINAND_INFO("EM73C044VCF",
@@ -167,6 +247,39 @@ static const struct spinand_info etron_spinand_table[] = {
 					      &update_cache_variants),
 		     SPINAND_HAS_QE_BIT,
 		     SPINAND_ECCINFO(&etron_ooblayout, etron_ecc_get_status)),
+	/* EM73C044VCF-0H: 1Gb, different OOB layout variant */
+	SPINAND_INFO("EM73C044VCF-0H",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x36),
+		     NAND_MEMORG(1, 2048, 64, 64, 1024, 20, 1, 1, 1),
+		     NAND_ECCREQ(4, 512),
+		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+					      &write_cache_variants,
+					      &update_cache_variants),
+		     SPINAND_HAS_QE_BIT,
+		     SPINAND_ECCINFO(&em73c044vcf_oh_ooblayout,
+				     em73c044vcf_oh_ecc_get_status)),
+	/* EM73E044VCE-OH: 4Gb, different OOB layout variant */
+	SPINAND_INFO("EM73E044VCE-OH",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x40),
+		     NAND_MEMORG(1, 2048, 128, 64, 4096, 40, 1, 1, 1),
+		     NAND_ECCREQ(8, 512),
+		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+					      &write_cache_variants,
+					      &update_cache_variants),
+		     SPINAND_HAS_QE_BIT,
+		     SPINAND_ECCINFO(&em73e044vce_oh_ooblayout,
+				     em73c044vcf_oh_ecc_get_status)),
+	/* EM73C044VCD-H: 1Gb, 3.3V */
+	SPINAND_INFO("EM73C044VCD-H",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x1C),
+		     NAND_MEMORG(1, 2048, 64, 64, 1024, 20, 1, 1, 1),
+		     NAND_ECCREQ(4, 512),
+		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+					      &write_cache_variants,
+					      &update_cache_variants),
+		     SPINAND_HAS_QE_BIT,
+		     SPINAND_ECCINFO(&em73c044vcf_oh_ooblayout,
+				     em73c044vcf_oh_ecc_get_status)),
 };
 
 static const struct spinand_manufacturer_ops etron_spinand_manuf_ops = {
