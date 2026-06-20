@@ -105,9 +105,35 @@ static const struct mtd_ooblayout_ops f50l1g41lb_ooblayout = {
 	.rfree = f50l1g41lb_ooblayout_free,
 };
 
+/*
+ * ecc bits: 0xC0[4,6]
+ * [0b000], No bit errors were detected;
+ * [0b001] and [0b011], 1~6 Bit errors were detected and corrected. Not
+ *	reach Flipping Bits;
+ * [0b101], Bit error count equals the bit flip
+ *	detection threshold
+ * [0b010], Multiple bit errors were detected and
+ *	not corrected.
+ * others, Reserved.
+ */
+static int f50l2g41ka_ecc_ecc_get_status(struct spinand_device *spinand,
+					 u8 status)
+{
+	struct nand_device *nand = spinand_to_nand(spinand);
+	u8 eccsr = (status & GENMASK(6, 4)) >> 4;
+
+	if (eccsr <= 1 || eccsr == 3)
+		return eccsr;
+	else if (eccsr == 5)
+		return nand->eccreq.strength;
+	else
+		return -EBADMSG;
+}
+
 static const struct spinand_info esmt_c8_spinand_table[] = {
 	SPINAND_INFO("F50L1G41LB",
-		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x01),
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x01, 0x7f,
+				0x7f, 0x7f),
 		     NAND_MEMORG(1, 2048, 64, 64, 1024, 20, 1, 1, 1),
 		     NAND_ECCREQ(1, 512),
 		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
@@ -116,7 +142,8 @@ static const struct spinand_info esmt_c8_spinand_table[] = {
 		     0,
 		     SPINAND_ECCINFO(&f50l1g41lb_ooblayout, NULL)),
 	SPINAND_INFO("F50D1G41LB",
-		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x11),
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x11, 0x7f,
+				0x7f, 0x7f),
 		     NAND_MEMORG(1, 2048, 64, 64, 1024, 20, 1, 1, 1),
 		     NAND_ECCREQ(1, 512),
 		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
@@ -134,12 +161,22 @@ static const struct spinand_info esmt_c8_spinand_table[] = {
 					      &update_cache_variants),
 		     0,
 		     SPINAND_ECCINFO(&f50l1g41lb_ooblayout, NULL)),
+	SPINAND_INFO("F50L2G41KA",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x41, 0x7f,
+				0x7f, 0x7f),
+		     NAND_MEMORG(1, 2048, 128, 64, 2048, 40, 1, 1, 1),
+		     NAND_ECCREQ(8, 512),
+		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+					      &write_cache_variants,
+					      &update_cache_variants),
+		     0,
+		     SPINAND_ECCINFO(&f50l1g41lb_ooblayout, f50l2g41ka_ecc_ecc_get_status)),
 };
 
 static const struct spinand_info esmt_8c_spinand_table[] = {
 	SPINAND_INFO("F50L1G41LC",
-		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x2C),
-			 NAND_MEMORG(1, 2048, 64, 64, 1024, 20, 1, 1, 1),
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x2C),
+		     NAND_MEMORG(1, 2048, 64, 64, 2048, 40, 1, 1, 1),
 		     NAND_ECCREQ(1, 512),
 		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
 					      &write_cache_variants,
@@ -161,7 +198,7 @@ const struct spinand_manufacturer esmt_c8_spinand_manufacturer = {
 
 const struct spinand_manufacturer esmt_8c_spinand_manufacturer = {
 	.id = SPINAND_MFR_ESMT_8C,
-	.name = "ESMT",
+	.name = "ESMT_ELITE",
 	.chips = esmt_8c_spinand_table,
 	.nchips = ARRAY_SIZE(esmt_8c_spinand_table),
 	.ops = &esmt_spinand_manuf_ops,
