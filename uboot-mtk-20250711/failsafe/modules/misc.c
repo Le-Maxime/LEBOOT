@@ -155,7 +155,7 @@ static int sysinfo_json_append_board(char *buf, int len, int left)
 		"\"mac_lan\":\"%s\",",
 		eth1addr ? eth1addr : "");
 	len += snprintf(buf + len, left - len,
-		"\"version\":\"LE-1.4 [%s%s]\",",
+		"\"version\":\"LE-1.4.1 [%s%s]\",",
 		git_hash ? git_hash : "unknown",
 		dirty ? "-dirty" : "");
 	len += snprintf(buf + len, left - len,
