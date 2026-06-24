@@ -15,10 +15,65 @@
 
 #include <net/mtk_httpd.h>
 #include <linux/types.h>
-#include "failsafe_helpers.h"
+#include <failsafe/fw_type.h>
+#include "modules/helpers.h"
 
-size_t json_escape(char *dst, size_t dst_sz, const char *src);
+/* ------------------------------------------------------------------ */
+/*  Core weak functions (defined in failsafe.c, used by modules)       */
+/* ------------------------------------------------------------------ */
 
+int failsafe_validate_image(const void *data, size_t size,
+			    failsafe_fw_t fw);
+int failsafe_write_image(const void *data, size_t size,
+			 failsafe_fw_t fw);
+
+/* ------------------------------------------------------------------ */
+/*  Handler declarations (used by failsafe.c for URI registration)     */
+/* ------------------------------------------------------------------ */
+
+/* ---- core handlers (misc.c) ---- */
+void version_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void sysinfo_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void reboot_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void reboot_failsafe_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void not_found_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void index_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void style_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void js_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void html_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+
+/* ---- upgrade handlers (upgrade.c) ---- */
+void upload_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void result_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+void mtd_layout_handler(enum httpd_uri_handler_status status,
+	struct httpd_request *request,
+	struct httpd_response *response);
+
+/* ---- sub-module handlers ---- */
+
+/* theme */
 void picture_handler(enum httpd_uri_handler_status status,
 	struct httpd_request *request,
 	struct httpd_response *response);
@@ -107,6 +162,34 @@ void ubi_mtd_list_handler(enum httpd_uri_handler_status status,
 void ubi_backup_handler(enum httpd_uri_handler_status status,
 	struct httpd_request *request,
 	struct httpd_response *response);
+#endif
+
+/* ------------------------------------------------------------------ */
+/*  Module registration functions                                      */
+/* ------------------------------------------------------------------ */
+
+/* Always compiled */
+void misc_register_handlers(struct httpd_instance *inst);
+void upgrade_register_handlers(struct httpd_instance *inst);
+
+/* Conditionally compiled */
+#ifdef CONFIG_WEBUI_FAILSAFE_BACKUP
+void backup_register_handlers(struct httpd_instance *inst);
+#endif
+#ifdef CONFIG_WEBUI_FAILSAFE_FLASH
+void flash_register_handlers(struct httpd_instance *inst);
+#endif
+#ifdef CONFIG_WEBUI_FAILSAFE_ENV
+void env_register_handlers(struct httpd_instance *inst);
+#endif
+#ifdef CONFIG_WEBUI_FAILSAFE_UI_BOOTSTRAP
+void theme_register_handlers(struct httpd_instance *inst);
+#endif
+#ifdef CONFIG_WEBUI_FAILSAFE_UBI
+void ubi_register_handlers(struct httpd_instance *inst);
+#endif
+#ifdef CONFIG_WEBUI_FAILSAFE_CONSOLE
+void console_register_handlers(struct httpd_instance *inst);
 #endif
 
 #endif /* _FAILSAFE_INTERNAL_H_ */

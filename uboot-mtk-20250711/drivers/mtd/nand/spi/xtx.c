@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
+ * SPI NAND flash driver for XTX (芯天下) devices.
+ *
  * Author:
  * Felix Matouschek <felix@matouschek.org>
  */
@@ -443,6 +445,24 @@ static const struct spinand_info xtx_spinand_table[] = {
 					      &update_cache_variants),
 		     SPINAND_HAS_QE_BIT,
 		     SPINAND_ECCINFO(&xt26g01c_ooblayout, xt26g11c_ecc_get_status)),
+	SPINAND_INFO("XT26G08DWSIGA",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x37),
+		     NAND_MEMORG(1, 4096, 256, 64, 4096, 40, 1, 1, 1),
+		     NAND_ECCREQ(8, 512),
+		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+					      &write_cache_variants,
+					      &update_cache_variants),
+		     SPINAND_HAS_QE_BIT,
+		     SPINAND_ECCINFO(&xt26g01c_ooblayout, xt26g11c_ecc_get_status)),
+	SPINAND_INFO("XT26G01FWSIGA",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x71),
+		     NAND_MEMORG(1, 2048, 128, 64, 1024, 20, 1, 1, 1),
+		     NAND_ECCREQ(8, 512),
+		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+					      &write_cache_variants,
+					      &update_cache_variants),
+		     SPINAND_HAS_QE_BIT,
+		     SPINAND_ECCINFO(&xt26g01c_ooblayout, xt26g01c_ecc_get_status)),
 };
 
 static const struct spinand_manufacturer_ops xtx_spinand_manuf_ops = {

@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2020-2021 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for HeYangTek (扬贺扬) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */
@@ -117,6 +119,35 @@ static const struct mtd_ooblayout_ops hyf2gq4uaacae_ooblayout = {
 	.rfree = hyf2gq4uaacae_ooblayout_free,
 };
 
+static int hyf4gq4uaacbe_ooblayout_ecc(struct mtd_info *mtd, int section,
+				       struct mtd_oob_region *region)
+{
+	if (section > 7)
+		return -ERANGE;
+
+	region->offset = (32 * section) + 8;
+	region->length = 24;
+
+	return 0;
+}
+
+static int hyf4gq4uaacbe_ooblayout_free(struct mtd_info *mtd, int section,
+					struct mtd_oob_region *region)
+{
+	if (section > 7)
+		return -ERANGE;
+
+	region->offset = 32 * section;
+	region->length = 8;
+
+	return 0;
+}
+
+static const struct mtd_ooblayout_ops hyf4gq4uaacbe_ooblayout = {
+	.ecc = hyf4gq4uaacbe_ooblayout_ecc,
+	.rfree = hyf4gq4uaacbe_ooblayout_free,
+};
+
 static int hyf1gq4udacae_ecc_get_status(struct spinand_device *spinand,
 					u8 status)
 {
@@ -197,7 +228,7 @@ static const struct spinand_info hyf_spinand_table[] = {
 					      &write_cache_variants,
 					      &update_cache_variants),
 		     SPINAND_HAS_QE_BIT,
-		     SPINAND_ECCINFO(&hyf2gq4uaacae_ooblayout,
+		     SPINAND_ECCINFO(&hyf4gq4uaacbe_ooblayout,
 				     hyf1gq4udacae_ecc_get_status)),
 	SPINAND_INFO("HYF2GQ4IAACAE",
 		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x82),
@@ -219,6 +250,24 @@ static const struct spinand_info hyf_spinand_table[] = {
 		     SPINAND_HAS_QE_BIT,
 		     SPINAND_ECCINFO(&hyf1gq4udacae_ooblayout,
 				     hyf1gq4udacae_ecc_get_status)),
+	SPINAND_INFO("HYF4GQ4IAACBE",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x86),
+		     NAND_MEMORG(1, 4096, 256, 64, 2048, 40, 1, 1, 1),
+		     NAND_ECCREQ(14, 512),
+		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+					      &write_cache_variants,
+					      &update_cache_variants),
+		     SPINAND_HAS_QE_BIT,
+		     SPINAND_ECCINFO(&hyf4gq4uaacbe_ooblayout, hyf1gq4udacae_ecc_get_status)),
+	SPINAND_INFO("HYFQ512NAC",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0x2B),
+		     NAND_MEMORG(1, 2048, 64, 64, 512, 10, 1, 1, 1),
+		     NAND_ECCREQ(4, 512),
+		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+					      &write_cache_variants,
+					      &update_cache_variants),
+		     SPINAND_HAS_QE_BIT,
+		     SPINAND_ECCINFO(&hyf1gq4udacae_ooblayout, hyf1gq4udacae_ecc_get_status)),
 };
 
 static const struct spinand_manufacturer_ops hyf_spinand_manuf_ops = {
@@ -226,7 +275,7 @@ static const struct spinand_manufacturer_ops hyf_spinand_manuf_ops = {
 
 const struct spinand_manufacturer hyf_spinand_manufacturer = {
 	.id = SPINAND_MFR_HYF,
-	.name = "hyf",
+	.name = "HeYangTek",
 	.chips = hyf_spinand_table,
 	.nchips = ARRAY_SIZE(hyf_spinand_table),
 	.ops = &hyf_spinand_manuf_ops,

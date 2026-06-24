@@ -4980,7 +4980,7 @@ function ensureBranding() {
     versionNode.style.fontSize = "0.82rem";
 
     versionNode.innerHTML = `
-        <strong>LEBOOT v1.3</strong><br>
+        <strong>LEBOOT v1.4</strong><br>
         дизайн: Le Maxime<br>
         <span style="font-size: 0.72rem; opacity: 0.85;">основано на ${baseVersion}</span>
     `;
@@ -6749,7 +6749,7 @@ function parseUserLen(input) {
                         size: 268435456 // 256 MB
                     },
                     mac: mac,
-                    version: "LEBOOT v1.3",
+                    version: "LEBOOT v1.4",
                     build_date: "2026-05-28"
                 };
                 
@@ -6762,7 +6762,7 @@ function parseUserLen(input) {
             // Handle version request
             if (req.url === "/version") {
                 setTimeout(() => {
-                    req.done?.("LEBOOT v1.3");
+                    req.done?.("LEBOOT v1.4");
                 }, 10);
                 return;
             }
@@ -6974,7 +6974,7 @@ function parseUserLen(input) {
                         size: 268435456
                     },
                     mac: mac,
-                    version: "LEBOOT v1.3",
+                    version: "LEBOOT v1.4",
                     build_date: "2026-05-28"
                 };
                 return new Response(JSON.stringify(sysinfo), { status: 200 });

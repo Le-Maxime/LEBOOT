@@ -1,4 +1,24 @@
 #!/bin/sh
+# ============================================================================
+# mt7621.sh - Build U-Boot for MediaTek MT7621 (MIPS) platform
+#
+# Usage:
+#   [SOC=mt7621] BOARD=<board_name> [VERSION=2025] \
+#   [FIXED_MTDPARTS=0|1] [MULTI_LAYOUT=0|1] ./mt7621.sh
+#
+# Examples:
+#   SOC=mt7621 BOARD=nmbm_rfb VERSION=2025 ./mt7621.sh
+#   BOARD=nand_ax_rfb ./mt7621.sh
+#
+# Description:
+#   This script builds U-Boot for the MT7621 MIPS-based SoC using the
+#   OpenWrt toolchain (mipsel-openwrt-linux-). If the toolchain is not
+#   found locally, the script offers to download it automatically from
+#   the OpenWrt release archives.
+#
+#   Output:
+#   - output_mt7621/<soc>-u-boot-<board>-<version>_md5-<hash>.bin
+# ============================================================================
 
 VERSION=${VERSION:-2025}
 SOC="${SOC:-mt7621}"

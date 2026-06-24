@@ -82,7 +82,7 @@ ifeq ($(origin BOARDS), undefined)
     EVAL_BOARDS := 1
   else
     EVAL_BOARDS := 1
-		BOARDS := $(shell if [ -f '$(CONFIG_FILE)' ] && [ -n '$(BOARD_ATF_CFG_DIR)' ] && [ -n '$(BOARD_UBOOT_CFG_DIR)' ]; then atf_list=$$(mktemp); uboot_list=$$(mktemp); find -L '$(BOARD_ATF_CFG_DIR)/configs' -maxdepth 1 -type f -name '*_defconfig' -printf '%f\n' | sed 's/_defconfig$$//' | sort -u > "$$atf_list"; find -L '$(BOARD_UBOOT_CFG_DIR)/configs' -maxdepth 1 -type f -name '*_defconfig' -printf '%f\n' | sed 's/_defconfig$$//' | sort -u > "$$uboot_list"; all_cfgs=$$(comm -12 "$$atf_list" "$$uboot_list"); rm -f "$$atf_list" "$$uboot_list"; selected_boards=$$(grep '^CONFIG_BOARD_[A-Z0-9_]*=y$$' '$(CONFIG_FILE)' | sed 's/^CONFIG_BOARD_//; s/=y$$//' | tr '[:upper:]' '[:lower:]'); selected_platforms=$$(grep '^CONFIG_BUILD_ALL_[A-Z0-9_]*=y$$' '$(CONFIG_FILE)' | sed 's/^CONFIG_BUILD_ALL_//; s/=y$$//' | tr '[:upper:]' '[:lower:]'); for cfg in $$all_cfgs; do cfg_norm=$$(printf '%s\n' "$$cfg" | tr '-' '_'); include=0; for sel in $$selected_boards; do [ "$$sel" = "$$cfg_norm" ] && include=1 && break; done; if [ "$$include" -eq 0 ]; then for plat in $$selected_platforms; do prefix="$${plat}_"; if [ "$$cfg_norm" != "$${cfg_norm#$$prefix}" ]; then include=1; break; fi; done; fi; [ "$$include" -eq 1 ] && printf '%s\n' "$$cfg" | sed 's/^[^_]*_//'; done | sort -u; fi)
+		BOARDS := $(shell if [ -f '$(CONFIG_FILE)' ] && [ -n '$(BOARD_ATF_CFG_DIR)' ] && [ -n '$(BOARD_UBOOT_CFG_DIR)' ]; then if grep -q '^CONFIG_VARIANT_UBI=y$$' '$(CONFIG_FILE)'; then atf_d='$(BOARD_ATF_CFG_DIR)/configs-ubi'; uboot_d='$(BOARD_UBOOT_CFG_DIR)/configs-ubi'; elif grep -q '^CONFIG_VARIANT_UBOOTMOD=y$$' '$(CONFIG_FILE)'; then atf_d='$(BOARD_ATF_CFG_DIR)/configs-ubi'; uboot_d='$(BOARD_UBOOT_CFG_DIR)/configs-fit'; elif grep -q '^CONFIG_VARIANT_NONMBM=y$$' '$(CONFIG_FILE)'; then atf_d='$(BOARD_ATF_CFG_DIR)/configs-nonmbm'; uboot_d='$(BOARD_UBOOT_CFG_DIR)/configs-nonmbm'; elif grep -q '^CONFIG_VARIANT_OPENWRT=y$$' '$(CONFIG_FILE)'; then atf_d='$(BOARD_ATF_CFG_DIR)/configs'; uboot_d='$(BOARD_UBOOT_CFG_DIR)/configs-openwrt'; else atf_d='$(BOARD_ATF_CFG_DIR)/configs'; uboot_d='$(BOARD_UBOOT_CFG_DIR)/configs'; fi; atf_list=$$(mktemp); uboot_list=$$(mktemp); if [ -d "$$atf_d" ] && [ -d "$$uboot_d" ]; then find -L "$$atf_d" -maxdepth 1 -type f -name '*_defconfig' -printf '%f\n' | sed 's/_defconfig$$//' | sort -u > "$$atf_list"; find -L "$$uboot_d" -maxdepth 1 -type f -name '*_defconfig' -printf '%f\n' | sed 's/_defconfig$$//' | sort -u > "$$uboot_list"; else find -L '$(BOARD_ATF_CFG_DIR)/configs' -maxdepth 1 -type f -name '*_defconfig' -printf '%f\n' | sed 's/_defconfig$$//' | sort -u > "$$atf_list"; find -L '$(BOARD_UBOOT_CFG_DIR)/configs' -maxdepth 1 -type f -name '*_defconfig' -printf '%f\n' | sed 's/_defconfig$$//' | sort -u > "$$uboot_list"; fi; all_cfgs=$$(comm -12 "$$atf_list" "$$uboot_list"); rm -f "$$atf_list" "$$uboot_list"; selected_boards=$$(grep '^CONFIG_BOARD_[A-Z0-9_]*=y$$' '$(CONFIG_FILE)' | sed 's/^CONFIG_BOARD_//; s/=y$$//' | tr '[:upper:]' '[:lower:]'); selected_platforms=$$(grep '^CONFIG_BUILD_ALL_[A-Z0-9_]*=y$$' '$(CONFIG_FILE)' | sed 's/^CONFIG_BUILD_ALL_//; s/=y$$//' | tr '[:upper:]' '[:lower:]'); for cfg in $$all_cfgs; do cfg_norm=$$(printf '%s\n' "$$cfg" | tr '-' '_'); include=0; for sel in $$selected_boards; do [ "$$sel" = "$$cfg_norm" ] && include=1 && break; done; if [ "$$include" -eq 0 ]; then for plat in $$selected_platforms; do prefix="$${plat}_"; if [ "$$cfg_norm" != "$${cfg_norm#$$prefix}" ]; then include=1; break; fi; done; fi; [ "$$include" -eq 1 ] && printf '%s\n' "$$cfg" | sed 's/^[^_]*_//'; done | sort -u; fi)
   endif
 else
   EVAL_BOARDS := 0
@@ -180,7 +180,7 @@ build:
 			var_lower=$$(echo "$(VARIANT)" | tr '[:upper:]' '[:lower:]'); \
 			case "$$var_lower" in \
 				ubootmod) \
-					atf_cfg="$$ATF_DIR_TMP/configs-ubi"; uboot_cfg="$$UBOOT_DIR_TMP/configs-fit" ;; \
+					atf_cfg="$$ATF_DIR_TMP/configs"; uboot_cfg="$$UBOOT_DIR_TMP/configs-fit" ;; \
 				ubi) \
 					atf_cfg="$$ATF_DIR_TMP/configs-ubi"; uboot_cfg="$$UBOOT_DIR_TMP/configs-ubi" ;; \
 				nonmbm) \
@@ -201,6 +201,19 @@ build:
 				find -L "$$ATF_DIR_TMP/configs" -maxdepth 1 -type f -name '*_defconfig' -printf '%f\n' | sed 's/_defconfig$$//' | sort -u > "$$atf_list"; \
 				find -L "$$UBOOT_DIR_TMP/configs" -maxdepth 1 -type f -name '*_defconfig' -printf '%f\n' | sed 's/_defconfig$$//' | sort -u > "$$uboot_list"; \
 				boards=$$(comm -12 "$$atf_list" "$$uboot_list" | sed 's/^[^_]*_//'); \
+			fi; \
+			if ! grep -q '^CONFIG_BUILD_ALL_BOARDS=y$$' '$(CONFIG_FILE)'; then \
+				sel_board=$$(grep '^CONFIG_BOARD_[A-Z0-9_]*=y$$' '$(CONFIG_FILE)' | sed 's/^CONFIG_BOARD_//; s/=y$$//' | tr '[:upper:]' '[:lower:]'); \
+				sel_plat=$$(grep '^CONFIG_BUILD_ALL_[A-Z0-9_]*=y$$' '$(CONFIG_FILE)' | sed 's/^CONFIG_BUILD_ALL_//; s/=y$$//' | tr '[:upper:]' '[:lower:]'); \
+				if [ -n "$$sel_board" ] || [ -n "$$sel_plat" ]; then \
+					newb=""; \
+					for b in $$boards; do b_n=$$(printf '%s\n' "$$b" | tr '-' '_'); ok=0; \
+						for s in $$sel_board; do [ "$$s" = "$$b_n" ] && ok=1 && break; done; \
+						if [ "$$ok" -eq 0 ]; then for p in $$sel_plat; do [ "$$b_n" != "$${b_n#$${p}_}" ] && ok=1 && break; done; fi; \
+						[ "$$ok" -eq 1 ] && newb="$$newb $$b"; \
+					done; \
+					boards="$$newb"; \
+				fi; \
 			fi; \
 		fi; \
 		if [[ -z "$$boards" ]]; then \

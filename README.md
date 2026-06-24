@@ -5,11 +5,11 @@
 >
 > Проект основан на оригинальном репозитории: [Yuzhii0718/bl-mt798x-dhcpd](https://github.com/Yuzhii0718/bl-mt798x-dhcpd)
 >
-> Базовый коммит оригинала: [`872291f76be723a64f5e11dec2368a9d73fe6686`](https://github.com/Yuzhii0718/bl-mt798x-dhcpd/commit/872291f76be723a64f5e11dec2368a9d73fe6686)
+> Базовый коммит оригинала: [`7492a8c81769b4143ab7f0eae736248b3c1fb06b`](https://github.com/Yuzhii0718/bl-mt798x-dhcpd/commit/7492a8c81769b4143ab7f0eae736248b3c1fb06b)
 >
-> Дата базового коммита: *2026-06-07 15:23:57*
+> Дата базового коммита: *2026-06-22 15:39:24*
 >
-> Название базового коммита: *"uboot: mediatek: defined RF part custom"*
+> Название базового коммита: *"uboot: failsafe: move embedded fsdata makefile to failsafe/embedded"*
 
 ---
 
@@ -91,6 +91,8 @@ sudo apt install gcc-aarch64-linux-gnu build-essential flex bison libssl-dev dev
 ```
 
 > Если вы собираете загрузчик под устройства на базе arm v7l, дополнительно установите `gcc-arm-linux-gnueabi`.
+>
+> Ресурсы аварийного веб-интерфейса (Failsafe Web UI) сжимаются и минифицируются на этапе сборки. Если вы компилируете U-Boot вручную, один раз выполните `npm install` в каталоге `uboot-mtk-20250711/failsafe/embedded`, чтобы установить локальные зависимости для сжатия (инструмент `build.sh` сделает это автоматически).
 
 ### Инструкция по сборке
 

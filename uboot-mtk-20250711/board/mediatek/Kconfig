@@ -314,6 +314,20 @@ config MEDIATEK_MTD_LAYOUT_PRINT
 	depends on MEDIATEK_MULTI_MTD_LAYOUT
 	default n
 
+config MTD_LAYOUT_SPI_NAND
+	bool "Replace nmbm0 with spi-nand0 in MTD layout"
+	depends on MEDIATEK_MULTI_MTD_LAYOUT
+	default n
+	help
+	  When enabled, the flash device name "nmbm0" in mtdids and
+	  mtdparts strings read from the device tree mtd-layout node
+	  will be replaced with "spi-nand0" at runtime. This allows
+	  the same device tree to be used for both NMBM and non-NMBM
+	  builds without maintaining separate DTS files.
+
+	  Enable this for non-NMBM builds where the raw flash device
+	  is named "spi-nand0" instead of "nmbm0".
+
 config MTD_VERIFY_FDT
 	bool "Enable mtd device boot Linux FDT verification"
 	depends on MTD

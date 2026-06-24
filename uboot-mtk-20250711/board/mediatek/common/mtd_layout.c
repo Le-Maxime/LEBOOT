@@ -12,6 +12,32 @@
 #define MTD_LAYOUT_CUSTOM_LABEL	"custom"
 #define MTD_LAYOUT_CUSTOM_ENV	"mtd_layout_custom"
 
+#ifdef CONFIG_MTD_LAYOUT_SPI_NAND
+static char mtd_layout_ids_buf[256];
+static char mtd_layout_parts_buf[512];
+
+const char *mtd_layout_spi_nand_replace(const char *str, char *buf, size_t bufsz)
+{
+	char *pos;
+
+	if (!str)
+		return NULL;
+
+	strncpy(buf, str, bufsz - 1);
+	buf[bufsz - 1] = '\0';
+
+	pos = buf;
+	while ((pos = strstr(pos, "nmbm0"))) {
+		/* "spi-nand0" is 9 chars, "nmbm0" is 5 chars */
+		memmove(pos + 9, pos + 5, strlen(pos + 5) + 1);
+		memcpy(pos, "spi-nand0", 9);
+		pos += 9;
+	}
+
+	return buf;
+}
+#endif
+
 #ifdef CONFIG_MEDIATEK_MTD_LAYOUT_PRINT
 static void log_mtd_layout_state(const char *layout_label, const char *mtdids,
 				 const char *mtdparts)
@@ -144,6 +170,13 @@ void board_mtdparts_default(const char **mtdids, const char **mtdparts)
 		sysupgrade_rootfs_ubipart = ofnode_read_string(layout_node, "sysupgrade_rootfs_ubipart");
 		cmdline = ofnode_read_string(layout_node, "cmdline");
 	}
+
+#ifdef CONFIG_MTD_LAYOUT_SPI_NAND
+	ids = mtd_layout_spi_nand_replace(ids, mtd_layout_ids_buf,
+					  sizeof(mtd_layout_ids_buf));
+	parts = mtd_layout_spi_nand_replace(parts, mtd_layout_parts_buf,
+					    sizeof(mtd_layout_parts_buf));
+#endif
 
 	if (custom_parts)
 		parts = custom_parts;

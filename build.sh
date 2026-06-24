@@ -1,4 +1,9 @@
 #!/bin/sh
+# ============================================================================
+# build.sh - Main build script for MediaTek MT798x platforms (ATF + U-Boot)
+#
+#   Run './build.sh --help' for full usage information.
+# ============================================================================
 
 AUTHOR="Yuzhii"
 
@@ -23,9 +28,42 @@ TELNETD=${TELNETD:-0}
 COPY_BL2=${COPY_BL2:-1}
 clean_mode=0
 
-if [ "${1:-}" = "--clean" ] || [ "${1:-}" = "-c" ]; then
-	clean_mode=1
-fi
+print_help() {
+	cat <<EOF
+build.sh - Build ATF + U-Boot for MediaTek MT798x platforms
+
+Usage:
+  BOARD=<board> [OPTIONS] ./build.sh
+  ./build.sh --clean
+  ./build.sh --help
+
+Required:
+  BOARD               Target board name (e.g. cmcc_a10, sn_r1)
+
+Optional:
+  SOC                 SoC: mt7981 | mt7986 | mt7987 | mt7988 (auto-detected if omitted)
+  VERSION             Firmware version: 2025 | SP1 | SP2        (default: 2025)
+  VARIANT             Build variant: default | ubootmod | ubi | nonmbm | openwrt
+                      (default: default)
+  FSTHEME             Failsafe UI theme: bootstrap | gl | mtk   (default: bootstrap)
+  FIXED_MTDPARTS      Enable fixed MTD partitions: 0 | 1        (default: 1)
+  MULTI_LAYOUT        Enable multi MTD layout: 0 | 1            (default: 0)
+  SIMG                Enable failsafe SIMG support: 0 | 1       (default: 0)
+  UBIMNG              Enable failsafe UBI management: 0 | 1     (default: 0)
+  TELNETD             Enable telnetd: 0 | 1                     (default: 0)
+  COPY_BL2            Copy bl2.img to output/: 0 | 1            (default: 1)
+
+Options:
+  --clean, -c         Distclean all source directories and exit
+  --help, -h          Show this help message and exit
+EOF
+	exit 0
+}
+
+case "${1:-}" in
+	--help|-h) print_help ;;
+	--clean|-c) clean_mode=1 ;;
+esac
 
 if [ "$VERSION" = "2025" ]; then
     UBOOT_DIR=$UBOOT25
@@ -60,11 +98,7 @@ if [ "$clean_mode" = "1" ]; then
 fi
 
 if [ -z "$BOARD" ]; then
-	echo "Usage: BOARD=<board name> [SOC=mt7981|mt7986|mt7987|mt7988] VERSION=[2025|SP1|SP2] VARIANT=[default|ubootmod|ubi|nonmbm|openwrt] [UBIMNG=1] [TELNETD=1] $0"
-	echo "eg: BOARD=cmcc_a10 $0"
-	echo "eg: BOARD=cmcc_a10 VARIANT=ubootmod $0"
-	echo "eg: BOARD=sn_r1 VERSION=2025 $0"
-	echo "eg: SOC=mt7981 BOARD=cmcc_a10 $0"
+	echo "Error: BOARD is required. Run '$0 --help' for usage information."
 	exit 1
 fi
 
@@ -138,22 +172,23 @@ command -v npm
 
 ensure_failsafe_js_deps() {
 	failsafe_dir="$UBOOT_DIR/failsafe"
-	package_json="$failsafe_dir/package.json"
-	marker="$failsafe_dir/.npm-install-done"
+	embed_dir="$failsafe_dir/embedded"
+	package_json="$embed_dir/package.json"
+	marker="$embed_dir/.npm-install-done"
 
 	if [ ! -f "$package_json" ]; then
 		echo "Skipping failsafe JS dependency setup: $package_json not found."
 		return 0
 	fi
 
-	if [ -f "$marker" ] && [ -d "$failsafe_dir/node_modules/terser" ]; then
+	if [ -f "$marker" ] && [ -d "$embed_dir/node_modules/terser" ]; then
 		echo "Failsafe JS build dependencies already installed."
 		return 0
 	fi
 
 	command -v npm >/dev/null 2>&1 || { echo "Error: npm is not installed on this system."; exit 1; }
 	echo "Installing failsafe JS build dependencies..."
-	(cd "$failsafe_dir" && npm install --no-audit --no-fund) || exit 1
+	(cd "$embed_dir" && npm install --no-audit --no-fund) || exit 1
 	touch "$marker"
 	echo "Failsafe JS build dependencies installed."
 }

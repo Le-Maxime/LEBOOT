@@ -2,6 +2,8 @@
 /*
  * Copyright (C) 2018 Stefan Roese <sr@denx.de>
  *
+ * SPI NAND flash driver for GigaDevice (兆易创新) devices.
+ *
  * Derived from drivers/mtd/nand/spi/micron.c
  *   Copyright (c) 2016-2017 Micron Technology, Inc.
  */
@@ -550,14 +552,34 @@ static const struct spinand_info gigadevice_spinand_table[] = {
 		     SPINAND_ECCINFO(&gd5fxgqx_variant2_ooblayout,
 				     gd5fxgq4uexxg_ecc_get_status)),
 	SPINAND_INFO("GD5F1GQ5UExxH",
-		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0xa1),
-		     NAND_MEMORG(1, 2048, 64, 64, 1024, 20, 1, 1, 1),
-		     NAND_ECCREQ(4, 512),
-		     SPINAND_INFO_OP_VARIANTS(&read_cache_variants_1gq5,
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x31),
+			 NAND_MEMORG(1, 2048, 64, 64, 1024, 20, 1, 1, 1),
+			 NAND_ECCREQ(4, 512),
+			 SPINAND_INFO_OP_VARIANTS(&read_cache_variants_1gq5,
 					      &write_cache_variants,
 					      &update_cache_variants),
-		     SPINAND_HAS_QE_BIT,
-		     SPINAND_ECCINFO(&gd5fxgqx_variant2_ooblayout,
+			 SPINAND_HAS_QE_BIT,
+			 SPINAND_ECCINFO(&gd5fxgqx_variant2_ooblayout,
+				     gd5fxgq5xexxg_ecc_get_status)),
+	SPINAND_INFO("GD5F2GQ5UExxH",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x32),
+			 NAND_MEMORG(1, 2048, 64, 64, 2048, 40, 1, 1, 1),
+			 NAND_ECCREQ(4, 512),
+			 SPINAND_INFO_OP_VARIANTS(&read_cache_variants_2gq5,
+					      &write_cache_variants,
+					      &update_cache_variants),
+			 SPINAND_HAS_QE_BIT,
+			 SPINAND_ECCINFO(&gd5fxgqx_variant2_ooblayout,
+				     gd5fxgq5xexxg_ecc_get_status)),
+	SPINAND_INFO("GD5F4GQ6UExxH",
+		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x35),
+			 NAND_MEMORG(1, 2048, 64, 64, 4096, 80, 1, 1, 1),
+			 NAND_ECCREQ(4, 512),
+			 SPINAND_INFO_OP_VARIANTS(&read_cache_variants_2gq5,
+					      &write_cache_variants,
+					      &update_cache_variants),
+			 SPINAND_HAS_QE_BIT,
+			 SPINAND_ECCINFO(&gd5fxgqx_variant2_ooblayout,
 				     gd5fxgq5xexxg_ecc_get_status)),
 	SPINAND_INFO("GD5F1GQ4UExxH",
 		     SPINAND_ID(SPINAND_READID_METHOD_OPCODE_ADDR, 0xd9),
@@ -599,9 +621,63 @@ static const struct spinand_info gigadevice_spinand_table[] = {
 		     SPINAND_HAS_QE_BIT,
 		     SPINAND_ECCINFO(&gd5fxgqx_variant2_ooblayout,
 				     gd5fxgq4uexxg_ecc_get_status)),
+	/* GD5F8GM8REYIGR: 8G-bit */
+	SPINAND_INFO("GD5F8GM8REYIGR",
+			SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x89),
+			NAND_MEMORG(1, 4096, 256, 64, 4096, 40, 1, 1, 1),
+			NAND_ECCREQ(8, 512),
+			SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+						&write_cache_variants,
+						&update_cache_variants),
+			SPINAND_HAS_QE_BIT,
+			SPINAND_ECCINFO(&gd5fxgq4xc_oob_256_ops,
+					gd5fxgq4uexxg_ecc_get_status)),
+	/* GD5F8GM8UEYIG: 8G-bit */
+	SPINAND_INFO("GD5F8GM8UEYIG",
+			SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x99),
+			NAND_MEMORG(1, 4096, 256, 64, 4096, 40, 1, 1, 1),
+			NAND_ECCREQ(8, 512),
+			SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+						&write_cache_variants,
+						&update_cache_variants),
+			SPINAND_HAS_QE_BIT,
+			SPINAND_ECCINFO(&gd5fxgq4xc_oob_256_ops,
+					gd5fxgq4uexxg_ecc_get_status)),
+	/* GD5F4GM7UEYIGR: 4G-bit, 4096-byte page */
+	SPINAND_INFO("GD5F4GM7UEYIGR",
+			SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x94),
+			NAND_MEMORG(1, 4096, 256, 64, 2048, 40, 1, 1, 1),
+			NAND_ECCREQ(8, 512),
+			SPINAND_INFO_OP_VARIANTS(&read_cache_variants,
+						&write_cache_variants,
+						&update_cache_variants),
+			SPINAND_HAS_QE_BIT,
+			SPINAND_ECCINFO(&gd5fxgq4xc_oob_256_ops,
+					gd5fxgq4xa_ecc_get_status)),
+	/* GD5F1GQ5RExxG: 1G-bit, 2-byte ID variant */
+	SPINAND_INFO("GD5F1GQ5RExxG",
+			SPINAND_ID(SPINAND_READID_METHOD_OPCODE_DUMMY, 0x41, 0xc8),
+			NAND_MEMORG(1, 2048, 128, 64, 1024, 20, 1, 1, 1),
+			NAND_ECCREQ(4, 512),
+			SPINAND_INFO_OP_VARIANTS(&read_cache_variants_1gq5,
+						&write_cache_variants,
+						&update_cache_variants),
+			SPINAND_HAS_QE_BIT,
+			SPINAND_ECCINFO(&gd5fxgqx_variant2_ooblayout,
+					gd5fxgq5xexxg_ecc_get_status)),
+};
+
+static int gigadevice_spinand_init(struct spinand_device *spinand)
+{
+	/* Enable buf read for specific chip variants */
+	if (spinand->id.data[1] == 0x91 || spinand->id.data[1] == 0x81)
+		spinand_upd_cfg(spinand, BIT(3), BIT(3));
+
+	return 0;
 };
 
 static const struct spinand_manufacturer_ops gigadevice_spinand_manuf_ops = {
+	.init = gigadevice_spinand_init,
 };
 
 const struct spinand_manufacturer gigadevice_spinand_manufacturer = {
